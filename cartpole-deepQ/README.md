@@ -15,7 +15,7 @@ Standard DQN with Experience Replay.
 
 ### Hyperparameters:
 
-* GAMMA = 0.95
+* GAMMA = 0.99
 * LEARNING_RATE = 0.001
 * MEMORY_SIZE = 1000000
 * BATCH_SIZE = 20
