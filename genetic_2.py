@@ -10,6 +10,7 @@ Original file is located at
 import keras
 import numpy as np
 import gym 
+import pandas as pd
 from keras.layers import Dense 
 from keras.models import Sequential 
 
@@ -35,11 +36,12 @@ def crossover_function(agents, rewards):
   return child_model
   
   
-def generate_population(child_model, num_children, scale_noise=0.1):
+def generate_population(child_model, num_children, agents, scale_noise=0.1):
   '''
   child_model: model from which building the new population
   num_children: number of children to generate
   scale_noise: variance of the gaussian noise to apply
+  agents: list of agents 
   '''
   new_children = []
   for child in range(num_children):
@@ -48,8 +50,9 @@ def generate_population(child_model, num_children, scale_noise=0.1):
       new_layer = np.random.normal(layer, scale_noise)
       new_child.append(new_layer)
   #Ho fatto questa piccola modifica per avere direttamente una lista di agenti che è quello che poi ci servirebbe piuttosto che una lista di modelli ma non sono sicuro che funzioni
-    new_children.append(Agent(state_size, action_size,new_child))
-  return new_children
+    agents[child].model.set_weights(new_child)
+    #new_children.append(Agent(state_size, action_size,new_child))
+  return agents
 
 
 def crossover_function_2(agents, rewards):
@@ -97,7 +100,7 @@ class Agent:
   
     def __init__(self, state_size, action_size, weights=None):
         # if you want to see Cartpole learning, then change to True
-        self.render = True
+        self.render = False
         self.load_model = False
         # get size of state and action
         self.state_size = state_size
@@ -124,7 +127,7 @@ class Agent:
         #return np.random.choice(self.action_size, 1, p=policy)[0]
         return np.argmax(policy)
 
-N = 50
+N = 100
 max_time = 1000
 n_generations = 100
 # In case of CartPole-v1, maximum length of episode is 500
@@ -143,6 +146,9 @@ for i in range(N):
   agents.append(agent)
 
 #ho rimosso la tupla perchè probabilmente ci basta solo una lista di agent e poi resettiamo sempre lo stesso ambiente
+mean_score_gen = []
+variance_score_gen = []
+max_score_gen = []
 
 for i in range(n_generations):
   print("generation: ", str(i))
@@ -170,8 +176,11 @@ for i in range(n_generations):
           #sys.exit()
   print(np.mean(scores))
   print(np.max(scores))
+  mean_score_gen.append(np.mean(scores))
+  variance_score_gen.append(np.var(scores))
+  max_score_gen.append(np.max(scores))
   #Ore creiamo il genitore della prossima generazione a partire dai risultati di quella precedente e sostituiamo la lista agents 
   parent = crossover_function(agents,scores)
-  agents = generate_population(parent,N,0.1)
-
-
+  agents = generate_population(parent,N, agents,0.1)
+data = pd.DataFrame({'mean': mean_score_gen,'variance': variance_score_gen,'max': max_score_gen})
+data.to_csv('data')
