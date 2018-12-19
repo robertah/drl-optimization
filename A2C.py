@@ -5,6 +5,7 @@ import numpy as np
 from keras.layers import Dense
 from keras.models import Sequential
 from keras.optimizers import Adam
+import matplotlib.pyplot as plt
 
 EPISODES = 1000
 
@@ -28,6 +29,8 @@ class A2CAgent:
         # create model for policy network
         self.actor = self.build_actor()
         self.critic = self.build_critic()
+
+        self.history = []
 
         if self.load_model:
             self.actor.load_weights("./save_model/cartpole_actor.h5")
@@ -65,9 +68,10 @@ class A2CAgent:
 
     # update policy network every episode
     def train_model(self, state, action, reward, next_state, done):
+	# target: reward Q value function
         target = np.zeros((1, self.value_size))
         advantages = np.zeros((1, self.action_size))
-
+	
         value = self.critic.predict(state)[0]
         next_value = self.critic.predict(next_state)[0]
 
@@ -78,8 +82,11 @@ class A2CAgent:
             advantages[0][action] = reward + self.discount_factor * (next_value) - value
             target[0][0] = reward + self.discount_factor * next_value
 
-        self.actor.fit(state, advantages, epochs=1, verbose=0)
-        self.critic.fit(state, target, epochs=1, verbose=0)
+        history = self.actor.fit(state, advantages, epochs=1, verbose=2)
+        history = self.critic.fit(state, target, epochs=1, verbose=0)
+        if not done:
+            self.history.extend(history.history['loss'])
+
 
 
 if __name__ == "__main__":
@@ -120,13 +127,18 @@ if __name__ == "__main__":
                 score = score if score == 500.0 else score + 100
                 scores.append(score)
                 episodes.append(e)
-                pylab.plot(episodes, scores, 'b')
+                print(agent.history)
+                plt.plot(agent.history)
+                plt.show()
+                #pylab.plot(episodes, scores, 'b')
                 pylab.savefig("./save_graph/cartpole_a2c.png")
                 print("episode:", e, "  score:", score)
 
                 # if the mean of scores of last 10 episode is bigger than 490
                 # stop training
-                if np.mean(scores[-min(10, len(scores)):]) > 490:
+                if np.mean(scores[-min(10, len(scores)):]) > 200:
+                    plt.plot(agent.history)
+                    plt.show()
                     sys.exit()
 
         # save the model

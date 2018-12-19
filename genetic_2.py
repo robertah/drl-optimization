@@ -60,41 +60,39 @@ def crossover_function_2(agents, rewards):
   models: a list of keras neural networks (parents agents)
   rewars: list (or array) of rewards associated to the performance of the
           corresponding model
-  return: the child weights computed by the weighted average
-          of the parents w.r.t. the reward
+  return: the best two agents
   '''
-  sorted_indeces = np.argsort(-rewards)
+  sorted_indeces = np.argsort(-np.array(rewards))
   best_agent = agents[sorted_indeces[0]]
 
   second_best = agents[sorted_indeces[1]]
   return best_agent, second_best
 
 
-def generate_population_2(child_model1, child_model2, num_children, scale_noise=0.01):
+def generate_population_2(child_model1, child_model2, num_children, agents, scale_noise=0.1):
   '''
   child_model: model from which building the new population
   num_children: number of children to generate
   scale_noise: variance of the gaussian noise to apply
   '''
 
-  new_children = []
-  for child in range(num_children/2-1):
+  for child in range(int(num_children/2)-1):
     new_child = []
     for layer in child_model1.model.get_weights():
       new_layer = np.random.normal(layer, scale_noise)
       new_child.append(new_layer)
-      new_children.append(Agent(state_size, action_size, new_child))
+    agents[child].model.set_weights(new_child)
 
-  for child in range(num_children/2-1):
+  for child in range(int(num_children/2)-1, num_children - 2):
     new_child = []
     for layer in child_model2.model.get_weights():
       new_layer = np.random.normal(layer, scale_noise)
       new_child.append(new_layer)
-      new_children.append(Agent(state_size, action_size, new_child))
-  new_children.append(child_model1)
-  new_children.append(child_model2)
+    agents[child].model.set_weights(new_child)
+  agents[-2].model.set_weights(child_model1.model.get_weights())
+  agents[-1].model.set_weights(child_model2.model.get_weights())
   #Ho fatto questa piccola modifica per avere direttamente una lista di agenti che è quello che poi ci servirebbe piuttosto che una lista di modelli ma non sono sicuro che funzioni
-  return new_children
+  return agents
 
 class Agent:
   
@@ -127,12 +125,12 @@ class Agent:
         #return np.random.choice(self.action_size, 1, p=policy)[0]
         return np.argmax(policy)
 
-N = 100
-max_time = 1000
+N = 50
+max_time = 2000
 n_generations = 100
 # In case of CartPole-v1, maximum length of episode is 500
 env = gym.make('CartPole-v1')
-env._max_episode_steps = 1000
+env._max_episode_steps = 2000
 #score_logger = ScoreLogger('CartPole-v1')
 # get size of state and action from environment
 state_size = env.observation_space.shape[0]
@@ -180,7 +178,12 @@ for i in range(n_generations):
   variance_score_gen.append(np.var(scores))
   max_score_gen.append(np.max(scores))
   #Ore creiamo il genitore della prossima generazione a partire dai risultati di quella precedente e sostituiamo la lista agents 
-  parent = crossover_function(agents,scores)
-  agents = generate_population(parent,N, agents,0.1)
+  #parent = crossover_function(agents,scores)
+  #agents = generate_population(parent,N, agents,0.1)
+  parent1, parent2 = crossover_function_2(agents, scores)
+  agents = generate_population_2(parent1, parent2, N, agents)
+  scores.pop(scores.index(np.max(scores)))
+  print(np.max(scores))
+
 data = pd.DataFrame({'mean': mean_score_gen,'variance': variance_score_gen,'max': max_score_gen})
-data.to_csv('data')
+data.to_csv('data.csv')
