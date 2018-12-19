@@ -20,7 +20,7 @@ def interpolate(initial_weights, final_weights, objective, n_steps):
     final_weights = initial_weights.reshape(1, final_weights.shape[0])
 
     # now each row has (1-alpha_i)w1, (1-alpha_i)w2 ...
-    weighted_initial_weights = np.dot((1-alphas),initial_weights)
+    weighted_initial_weights = np.dot((1-alphas), initial_weights)
 
     # now each row has (alpha_i)w1, (alpha_i)w2 ...
     weighted_final_weights = np.dot(alphas, final_weights)

@@ -1,6 +1,6 @@
 import sys
 import gym
-import pylab
+#import pylab
 import numpy as np
 from keras.layers import Dense
 from keras.models import Sequential
@@ -68,10 +68,10 @@ class A2CAgent:
 
     # update policy network every episode
     def train_model(self, state, action, reward, next_state, done):
-	# target: reward Q value function
+    # target: reward Q value function
         target = np.zeros((1, self.value_size))
         advantages = np.zeros((1, self.action_size))
-	
+
         value = self.critic.predict(state)[0]
         next_value = self.critic.predict(next_state)[0]
 
@@ -86,7 +86,6 @@ class A2CAgent:
         history = self.critic.fit(state, target, epochs=1, verbose=0)
         if not done:
             self.history.extend(history.history['loss'])
-
 
 
 if __name__ == "__main__":
@@ -106,6 +105,8 @@ if __name__ == "__main__":
         score = 0
         state = env.reset()
         state = np.reshape(state, [1, state_size])
+        if e == 0:
+            print(state)
 
         while not done:
             if agent.render:
@@ -131,7 +132,7 @@ if __name__ == "__main__":
                 plt.plot(agent.history)
                 plt.show()
                 #pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/cartpole_a2c.png")
+                #pylab.savefig("./save_graph/cartpole_a2c.png")
                 print("episode:", e, "  score:", score)
 
                 # if the mean of scores of last 10 episode is bigger than 490
@@ -144,4 +145,4 @@ if __name__ == "__main__":
         # save the model
         if e % 50 == 0:
             agent.actor.save_weights("./save_model/cartpole_actor.h5")
-agent.critic.save_weights("./save_model/cartpole_critic.h5")
+    agent.critic.save_weights("./save_model/cartpole_critic.h5")
