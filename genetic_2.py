@@ -13,98 +13,24 @@ import gym
 import pandas as pd
 from keras.layers import Dense 
 from keras.models import Sequential 
+from genetic_functions import crossover_function, crossover_function_2, generate_population_2, generate_population
 
-
-def crossover_function(agents, rewards):
-    '''
-    models: a list of keras neural networks (parents agents)
-    rewars: list (or array) of rewards associated to the performance of the
-          corresponding model
-    return: the child weights computed by the weighted average
-          of the parents w.r.t. the reward
-    '''
-    rewards = np.array(rewards)
-    num_layers = len(agents[0].model.get_weights())
-    normalized_rewards = rewards/np.sum(rewards)
-    child_model = []
-    for i in range(num_layers):
-        new_layer = np.zeros_like(agents[0].model.get_weights()[i])
-        for j,parent_agent in enumerate(agents):
-            layer = parent_agent.model.get_weights()[i] * normalized_rewards[j]
-            new_layer = new_layer + layer
-        child_model.append(new_layer)
-    return child_model
-  
-  
-def generate_population(child_model, num_children, agents, scale_noise=0.1):
-    """
-    child_model: model from which building the new population
-    num_children: number of children to generate
-    scale_noise: variance of the gaussian noise to apply
-    agents: list of agents
-    """
-
-    new_children = []
-    for child in range(num_children):
-        new_child = []
-        for layer in child_model:
-            new_layer = np.random.normal(layer, scale_noise)
-            new_child.append(new_layer)
-        # Ho fatto questa piccola modifica per avere direttamente una lista di agenti che è quello che poi ci servirebbe piuttosto che una lista di modelli ma non sono sicuro che funzioni
-        agents[child].model.set_weights(new_child)
-    # new_children.append(Agent(state_size, action_size,new_child))
-    return agents
-
-
-def crossover_function_2(agents, rewards):
-    '''
-    models: a list of keras neural networks (parents agents)
-    rewars: list (or array) of rewards associated to the performance of the
-          corresponding model
-    return: the best two agents
-    '''
-    sorted_indeces = np.argsort(-np.array(rewards))
-    best_agent = agents[sorted_indeces[0]]
-
-    second_best = agents[sorted_indeces[1]]
-    return best_agent, second_best
-
-
-def generate_population_2(child_model1, child_model2, num_children, agents, scale_noise=0.1):
-    '''
-    child_model: model from which building the new population
-    num_children: number of children to generate
-    scale_noise: variance of the gaussian noise to apply
-    '''
-
-    for child in range(int(num_children/2)-1):
-        new_child = []
-        for layer in child_model1.model.get_weights():
-            new_layer = np.random.normal(layer, scale_noise)
-            new_child.append(new_layer)
-        agents[child].model.set_weights(new_child)
-
-    for child in range(int(num_children/2)-1, num_children - 2):
-        new_child = []
-        for layer in child_model2.model.get_weights():
-          new_layer = np.random.normal(layer, scale_noise)
-          new_child.append(new_layer)
-        agents[child].model.set_weights(new_child)
-
-    agents[-2].model.set_weights(child_model1.model.get_weights())
-    agents[-1].model.set_weights(child_model2.model.get_weights())
-      #Ho fatto questa piccola modifica per avere direttamente una lista di agenti che è quello che poi ci servirebbe piuttosto che una lista di modelli ma non sono sicuro che funzioni
-    return agents
 
 class Agent:
   
-    def __init__(self, state_size, action_size, weights=None):
+    def __init__(self, env=gym.make('CartPole-v1'), weights=None):
         # if you want to see Cartpole learning, then change to True
+        self.max_time = 2000
+        self.env = env
+        # In case of CartPole-v1, maximum length of episode is 500
+        self.env._max_episode_steps = 2000
+        # score_logger = ScoreLogger('CartPole-v1')
+        # get size of state and action from environment
+        self.state_size = env.observation_space.shape[0]
+        self.action_size = env.action_space.n
         self.render = False
         self.load_model = False
         # get size of state and action
-        self.state_size = state_size
-        self.action_size = action_size
         self.value_size = 1
         # create model for policy network
         self.model = self.build_model()
@@ -127,65 +53,65 @@ class Agent:
         #return np.random.choice(self.action_size, 1, p=policy)[0]
         return np.argmax(policy)
 
-N = 50
-max_time = 2000
-n_generations = 100
-# In case of CartPole-v1, maximum length of episode is 500
-env = gym.make('CartPole-v1')
-env._max_episode_steps = 2000
-#score_logger = ScoreLogger('CartPole-v1')
-# get size of state and action from environment
-state_size = env.observation_space.shape[0]
-action_size = env.action_space.n
+    def run_agent(self):
+        done = False
+        score = 0
+        state = self.env.reset()
+        state = np.reshape(state, [1, self.state_size])
+        # print("intial state: ",state)
+        while (not done) and (score < self.max_time):
+            if self.render:
+                self.env.render()
 
-agents = []
-#scores è quello che nella funzione crossover abbiamo chiamo rewards forse bisogna rinominarli
-scores = []
-for i in range(N):
-  agent = Agent(state_size, action_size)
-  agents.append(agent)
+            action = self.get_action(state)
+            next_state, reward, done, info = self.env.step(action)
+            next_state = np.reshape(next_state, [1, self.state_size])
+            score += reward
+            state = next_state
 
-#ho rimosso la tupla perchè probabilmente ci basta solo una lista di agent e poi resettiamo sempre lo stesso ambiente
-mean_score_gen = []
-variance_score_gen = []
-max_score_gen = []
+            if done:
+                return score
 
-for i in range(n_generations):
-  print("generation: ", str(i))
-  scores = []
-  for agent in agents:
-    #agents_list.append(agent)
-    done = False
-    score = 0
-    state = env.reset()
-    state = np.reshape(state, [1, state_size])
-    while (not done) and (score < max_time):
-        if agent.render:
-          env.render()
 
-        action = agent.get_action(state)
-        next_state, reward, done, info = env.step(action)
-        next_state = np.reshape(next_state, [1, state_size])
-        score += reward
-        state = next_state
+def run_agent_genetic(env=gym.make('CartPole-v1'), N=50, n_generations=100):
 
-        if done:
-          #print(score)
-          scores.append(score)
-          state = env.reset()
-          #sys.exit()
-  print(np.mean(scores))
-  print(np.max(scores))
-  mean_score_gen.append(np.mean(scores))
-  variance_score_gen.append(np.var(scores))
-  max_score_gen.append(np.max(scores))
-  #Ore creiamo il genitore della prossima generazione a partire dai risultati di quella precedente e sostituiamo la lista agents 
-  #parent = crossover_function(agents,scores)
-  #agents = generate_population(parent,N, agents,0.1)
-  parent1, parent2 = crossover_function_2(agents, scores)
-  agents = generate_population_2(parent1, parent2, N, agents)
-  scores.pop(scores.index(np.max(scores)))
-  print(np.max(scores))
+    agents = []
+    #scores è quello che nella funzione crossover abbiamo chiamo rewards forse bisogna rinominarli
+    scores = []
+    for i in range(N):
+      agent = Agent(env)
+      agents.append(agent)
 
-data = pd.DataFrame({'mean': mean_score_gen,'variance': variance_score_gen,'max': max_score_gen})
-data.to_csv('data.csv')
+    #ho rimosso la tupla perchè probabilmente ci basta solo una lista di agent e poi resettiamo sempre lo stesso ambiente
+    mean_score_gen = []
+    variance_score_gen = []
+    max_score_gen = []
+
+    for i in range(n_generations):
+        print("generation: ", str(i))
+        scores = []
+        for agent in agents:
+            score = agent.run_agent()
+            #print(score)
+            scores.append(score)
+            #state = env.reset()
+            #sys.exit()
+        print(np.mean(scores))
+        print(np.max(scores))
+        mean_score_gen.append(np.mean(scores))
+        variance_score_gen.append(np.var(scores))
+        max_score_gen.append(np.max(scores))
+        #Ore creiamo il genitore della prossima generazione a partire dai risultati di quella precedente e sostituiamo la lista agents
+        #parent = crossover_function(agents,scores)
+        #agents = generate_population(parent,N, agents,0.1)
+        child = crossover_function(agents, scores)
+        if i == 0:
+            initial_agent = Agent(weights=child)
+        agents = generate_population(child, N, agents)
+        scores.pop(scores.index(np.max(scores)))
+        print(np.max(scores))
+
+    data = pd.DataFrame({'mean': mean_score_gen,'variance': variance_score_gen,'max': max_score_gen})
+    data.to_csv('data.csv')
+    final_agent = Agent(weights=child)
+    return initial_agent, final_agent
