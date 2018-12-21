@@ -106,12 +106,12 @@ def run_agent_genetic(env=gym.make('CartPole-v1'), N=50, n_generations=100):
         #agents = generate_population(parent,N, agents,0.1)
         child = crossover_function(agents, scores)
         if i == 0:
-            initial_agent = Agent(weights=child)
+            initial_agent = Agent(env, weights=child)
         agents = generate_population(child, N, agents)
-        scores.pop(scores.index(np.max(scores)))
-        print(np.max(scores))
+        #scores.pop(scores.index(np.max(scores)))
+        #print(np.max(scores))
 
     data = pd.DataFrame({'mean': mean_score_gen,'variance': variance_score_gen,'max': max_score_gen})
     data.to_csv('data.csv')
-    final_agent = Agent(weights=child)
+    final_agent = Agent(env, weights=child)
     return initial_agent, final_agent

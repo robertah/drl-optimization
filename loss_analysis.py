@@ -18,14 +18,13 @@ def interpolate(initial_agent, final_agent, objective, n_steps):
     :param n_steps: number of interpolation steps
     :return: a numpy array containing J(theta) for each a (array of length n_steps)
     """
-
     alphas = np.linspace(0, 1, n_steps).reshape(n_steps, 1)
 
     initial_weights = from_agent_to_weights(initial_agent)
     initial_weights = initial_weights.reshape(1, initial_weights.shape[0])
 
     final_weights = from_agent_to_weights(final_agent)
-    final_weights = initial_weights.reshape(1, final_weights.shape[0])
+    final_weights = final_weights.reshape(1, final_weights.shape[0])
 
     # now each row has (1-alpha_i)w1, (1-alpha_i)w2 ...
     weighted_initial_weights = np.dot((1-alphas), initial_weights)
@@ -34,7 +33,6 @@ def interpolate(initial_agent, final_agent, objective, n_steps):
     weighted_final_weights = np.dot(alphas, final_weights)
 
     new_weights = weighted_initial_weights + weighted_final_weights
-
     # we need a random agent
     agent = Agent()
     objective_values = np.apply_along_axis(lambda row: objective(row, agent), axis=1, arr=new_weights)
@@ -68,7 +66,7 @@ def from_weights_to_layers(weights, agent):
     return new_layers
 
 
-def execute_agent_multiple_times(weights, agent, n_times=50):
+def execute_agent_multiple_times(weights, agent, n_times=20):
     new_layers = from_weights_to_layers(weights, agent)
     agent.model.set_weights(new_layers)
     print("one objective: ")
@@ -87,7 +85,7 @@ if __name__ == '__main__':
 
     print("training_finished")
 
-    results = interpolate(initial_agent, final_agent, execute_agent_multiple_times, n_steps=50)
+    results = interpolate(initial_agent, final_agent, execute_agent_multiple_times, n_steps=20)
 
     np.save("interpolation_results", results)
 
