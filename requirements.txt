@@ -4,3 +4,5 @@ matplotlib
 numpy
 pylab
 tensorflow
+pandas
+scikit-learn

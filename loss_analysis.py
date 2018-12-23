@@ -78,10 +78,12 @@ def execute_agent_multiple_times(weights, agent, n_times=20):
 
 
 if __name__ == '__main__':
-    from genetic_2 import run_agent_genetic
+    from genetic import run_agent_genetic_2
     import matplotlib.pyplot as plt
 
-    initial_agent, final_agent = run_agent_genetic(n_generations=20)
+    _, children = run_agent_genetic_2(n_generations=20, return_children=True)
+    initial_agent = Agent(weights=children[0])
+    final_agent = Agent(weights=children[-1])
 
     print("training_finished")
 

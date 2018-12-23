@@ -1,6 +1,5 @@
 import numpy as np
 
-
 def crossover_function(agents, rewards):
     '''
     agents: a list of keras neural networks (parents agents)

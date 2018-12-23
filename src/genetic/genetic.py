@@ -7,17 +7,16 @@ Original file is located at
     https://colab.research.google.com/drive/1SjH7SLZuhPFiD00JbG2pf4iOT_EFBiPP
 """
 
-import keras
 import numpy as np
-import gym 
+import gym
 import pandas as pd
-from keras.layers import Dense 
-from keras.models import Sequential 
-from genetic_functions import crossover_function, crossover_function_2, generate_population_2, generate_population
+from keras.layers import Dense
+from keras.models import Sequential
+from .genetic_functions import crossover_function, generate_population
 
 
 class Agent:
-  
+
     def __init__(self, env=gym.make('CartPole-v1'), weights=None):
         # if you want to see Cartpole learning, then change to True
         self.max_time = 2000
@@ -34,9 +33,9 @@ class Agent:
         self.value_size = 1
         # create model for policy network
         self.model = self.build_model()
-        if weights is not None: 
+        if weights is not None:
           self.model.set_weights(weights)
-          
+
     def build_model(self):
       model = Sequential()
       model.add(Dense(24, input_dim=self.state_size, activation='relu',
@@ -48,7 +47,7 @@ class Agent:
 
     def get_action(self, state):
         policy = self.model.predict(state, batch_size=1).flatten()
-        #secondo me non ha molto senso fare una multinomial perchè ora non stiamo trainando niente quindi è solo una cosa deterministica che sceglie l'azione in base alla policy, dall'esploration non trarrebbe effettivamente nessun vantaggio se non eventualmente un punteggio più alto dovuto alla casualità del sampling e che quindi non rispecchia proprimanete la policy e lo stesso per un punteggio più basso. 
+        #secondo me non ha molto senso fare una multinomial perchè ora non stiamo trainando niente quindi è solo una cosa deterministica che sceglie l'azione in base alla policy, dall'esploration non trarrebbe effettivamente nessun vantaggio se non eventualmente un punteggio più alto dovuto alla casualità del sampling e che quindi non rispecchia proprimanete la policy e lo stesso per un punteggio più basso.
         #per questo prenderei soltanto l'azione con la probabilità maggiore
         #return np.random.choice(self.action_size, 1, p=policy)[0]
         return np.argmax(policy)
@@ -126,7 +125,7 @@ def run_agent_genetic_2(env=gym.make('CartPole-v1'), n_agents=50, n_generations=
     agents = [Agent(env) for _ in range(n_agents)]
 
     # chidren models
-    children = []
+    children = np.empty((n_generations, 4), dtype=np.ndarray)
 
     for i in range(n_generations):
         results[i][0] = agents
@@ -135,7 +134,7 @@ def run_agent_genetic_2(env=gym.make('CartPole-v1'), n_agents=50, n_generations=
             results[i][1][j] = score
 
         child = crossover_function(agents, results[i][1])
-        children.append(child)
+        children[i] = np.array(child, dtype=np.ndarray).reshape(4)
         agents = generate_population(child, n_agents, agents)
 
     if return_children:
