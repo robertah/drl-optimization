@@ -78,16 +78,16 @@ def execute_agent_multiple_times(weights, agent, n_times=20):
 
 
 if __name__ == '__main__':
-    from genetic import run_agent_genetic_2
+    from .genetic import run_agent_genetic
     import matplotlib.pyplot as plt
 
-    _, children = run_agent_genetic_2(n_generations=20, return_children=True)
+    _, children = run_agent_genetic(n_generations=30, return_children=True)
     initial_agent = Agent(weights=children[0])
     final_agent = Agent(weights=children[-1])
 
     print("training_finished")
 
-    results = interpolate(initial_agent, final_agent, execute_agent_multiple_times, n_steps=20)
+    results = interpolate(initial_agent, final_agent, execute_agent_multiple_times, n_steps=40)
 
     np.save("interpolation_results", results)
 

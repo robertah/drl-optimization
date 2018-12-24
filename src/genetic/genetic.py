@@ -72,51 +72,7 @@ class Agent:
                 return score
 
 
-def run_agent_genetic(env=gym.make('CartPole-v1'), N=50, n_generations=100):
-
-    agents = []
-    #scores è quello che nella funzione crossover abbiamo chiamo rewards forse bisogna rinominarli
-    scores = []
-    for i in range(N):
-      agent = Agent(env)
-      agents.append(agent)
-
-    #ho rimosso la tupla perchè probabilmente ci basta solo una lista di agent e poi resettiamo sempre lo stesso ambiente
-    mean_score_gen = []
-    variance_score_gen = []
-    max_score_gen = []
-
-    for i in range(n_generations):
-        print("generation: ", i)
-        scores = []
-        for agent in agents:
-            score = agent.run_agent()
-            #print(score)
-            scores.append(score)
-            #state = env.reset()
-            #sys.exit()
-        print(np.mean(scores))
-        print(np.max(scores))
-        mean_score_gen.append(np.mean(scores))
-        variance_score_gen.append(np.var(scores))
-        max_score_gen.append(np.max(scores))
-        #Ore creiamo il genitore della prossima generazione a partire dai risultati di quella precedente e sostituiamo la lista agents
-        #parent = crossover_function(agents,scores)
-        #agents = generate_population(parent,N, agents,0.1)
-        child = crossover_function(agents, scores)
-        if i == 0:
-            initial_agent = Agent(env, weights=child)
-        agents = generate_population(child, N, agents)
-        #scores.pop(scores.index(np.max(scores)))
-        #print(np.max(scores))
-
-    data = pd.DataFrame({'mean': mean_score_gen,'variance': variance_score_gen,'max': max_score_gen})
-    data.to_csv('data.csv')
-    final_agent = Agent(env, weights=child)
-    return initial_agent, final_agent
-
-
-def run_agent_genetic_2(env=gym.make('CartPole-v1'), n_agents=50, n_generations=100, return_children=False):
+def run_agent_genetic(env=gym.make('CartPole-v1'), n_agents=50, n_generations=100, return_children=False):
 
     # results stores all the agents and scores of each generation
     results = np.empty((n_generations, 2, n_agents), dtype=object)
@@ -124,7 +80,7 @@ def run_agent_genetic_2(env=gym.make('CartPole-v1'), n_agents=50, n_generations=
     # initialize agents
     agents = [Agent(env) for _ in range(n_agents)]
 
-    # chidren models
+    # children models
     children = np.empty((n_generations, 4), dtype=np.ndarray)
 
     for i in range(n_generations):
