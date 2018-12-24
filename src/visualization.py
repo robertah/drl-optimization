@@ -35,3 +35,19 @@ def plot_weights_difference(weights, title="Weights Diffs over Generations", xla
     plt.xlabel(xlabel, fontsize=18)
     plt.ylabel(ylabel, fontsize=18)
 
+
+def plot_scores(scores, title="Scores over generations", xlabel="Generations", ylabel="Scores"):
+    x_ticks = np.arange(len(scores))
+    means = np.mean(scores, axis=1)
+    stds = np.std(scores, axis=1)
+    maxs = np.max(scores, axis=1)
+    plt.figure(figsize=(20, 10))
+    plt.plot(means, label="mean")
+    plt.fill_between(x_ticks, means - stds, means + stds, color="grey", alpha=0.2, label="standard deviation")
+    plt.plot(maxs, label="max")
+    plt.title(title, fontsize=18)
+    plt.xlabel(xlabel, fontsize=18)
+    plt.ylabel(ylabel, fontsize=18)
+    plt.legend(fontsize=16)
+
+
