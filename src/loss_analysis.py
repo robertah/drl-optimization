@@ -81,7 +81,7 @@ if __name__ == '__main__':
     from genetic import run_agent_genetic
     import matplotlib.pyplot as plt
 
-    _, children = run_agent_genetic(n_agents=100, n_generations=30, return_children=True)
+    _, _, children = run_agent_genetic(n_agents=50, n_generations=50)
     initial_agent = Agent(weights=children[0])
     final_agent = Agent(weights=children[-1])
 

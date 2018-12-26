@@ -62,6 +62,7 @@ def run_agent_a2c():
                     sys.exit()
 
         # save the model
-        if e % 50 == 0:
-            agent.actor.save_weights("./save_model/cartpole_actor.h5")
-    agent.critic.save_weights("./save_model/cartpole_critic.h5")
+        # if e % 50 == 0:
+        #     agent.actor.save_weights("./save_model/cartpole_actor.h5")
+    # agent.critic.save_weights("./save_model/cartpole_critic.h5")
+    return scores

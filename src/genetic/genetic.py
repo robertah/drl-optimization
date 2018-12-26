@@ -7,11 +7,11 @@ Original file is located at
     https://colab.research.google.com/drive/1SjH7SLZuhPFiD00JbG2pf4iOT_EFBiPP
 """
 
-import numpy as np
 import gym
-import pandas as pd
+import numpy as np
 from keras.layers import Dense
 from keras.models import Sequential
+
 from .genetic_functions import crossover_function, generate_population
 
 
@@ -34,22 +34,22 @@ class Agent:
         # create model for policy network
         self.model = self.build_model()
         if weights is not None:
-          self.model.set_weights(weights)
+            self.model.set_weights(weights)
 
     def build_model(self):
-      model = Sequential()
-      model.add(Dense(24, input_dim=self.state_size, activation='relu',
-                      kernel_initializer='he_uniform', name="input"))
-      model.add(Dense(self.action_size, activation='softmax',
-                      kernel_initializer='he_uniform', name="output"))
-      #model.summary()
-      return model
+        model = Sequential()
+        model.add(Dense(24, input_dim=self.state_size, activation='relu',
+                        kernel_initializer='he_uniform', name="input"))
+        model.add(Dense(self.action_size, activation='softmax',
+                        kernel_initializer='he_uniform', name="output"))
+        # model.summary()
+        return model
 
     def get_action(self, state):
         policy = self.model.predict(state, batch_size=1).flatten()
-        #secondo me non ha molto senso fare una multinomial perchè ora non stiamo trainando niente quindi è solo una cosa deterministica che sceglie l'azione in base alla policy, dall'esploration non trarrebbe effettivamente nessun vantaggio se non eventualmente un punteggio più alto dovuto alla casualità del sampling e che quindi non rispecchia proprimanete la policy e lo stesso per un punteggio più basso.
-        #per questo prenderei soltanto l'azione con la probabilità maggiore
-        #return np.random.choice(self.action_size, 1, p=policy)[0]
+        # secondo me non ha molto senso fare una multinomial perchè ora non stiamo trainando niente quindi è solo una cosa deterministica che sceglie l'azione in base alla policy, dall'esploration non trarrebbe effettivamente nessun vantaggio se non eventualmente un punteggio più alto dovuto alla casualità del sampling e che quindi non rispecchia proprimanete la policy e lo stesso per un punteggio più basso.
+        # per questo prenderei soltanto l'azione con la probabilità maggiore
+        # return np.random.choice(self.action_size, 1, p=policy)[0]
         return np.argmax(policy)
 
     def run_agent(self):
@@ -72,28 +72,26 @@ class Agent:
                 return score
 
 
-def run_agent_genetic(env=gym.make('CartPole-v1'), n_agents=50, n_generations=100, return_children=False):
+def run_agent_genetic(env=gym.make('CartPole-v1'), n_agents=50, n_generations=100):
 
-    # results stores all the agents and scores of each generation
-    results = np.empty((n_generations, 2, n_agents), dtype=object)
+    n_weights = len(Agent(env).model.get_weights())
+
+    agents_weights = np.empty((n_generations, n_agents, n_weights), dtype=np.ndarray)
+    scores = np.empty((n_generations, n_agents), dtype=float)
+
+    children = np.empty((n_generations, n_weights), dtype=np.ndarray)
 
     # initialize agents
     agents = [Agent(env) for _ in range(n_agents)]
 
-    # children models
-    children = np.empty((n_generations, 4), dtype=np.ndarray)
-
     for i in range(n_generations):
-        results[i][0] = agents
-        for j, agent in enumerate(agents):
-            score = agent.run_agent()
-            results[i][1][j] = score
+        agents_weights[i] = np.array([a.model.get_weights() for a in agents], dtype=np.ndarray)
 
-        child = crossover_function(agents, results[i][1])
-        children[i] = np.array(child, dtype=np.ndarray).reshape(4)
+        for j, agent in enumerate(agents):  # TODO parallelize
+            scores[i][j] = agent.run_agent()
+
+        child = crossover_function(agents, scores[i])
+        children[i] = np.array(child, dtype=np.ndarray).reshape(n_weights)
         agents = generate_population(child, n_agents, agents)
 
-    if return_children:
-        return results, children
-
-    return results
+    return agents_weights, scores, children
