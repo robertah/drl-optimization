@@ -64,8 +64,7 @@ def plot_scores(scores, title="Scores over generations", xlabel="Generations", y
     """
     Plot the mean, std bands and max of scores obtained during training
 
-    :param scores: scores (ndarray) obtained by each agent during each generation (e.g. if using results returned by
-                   run_agent_genetic(), scores = np.array(results[:, 1, :], dtype=float))
+    :param scores: scores (ndarray) obtained by each agent during each generation
     :param title: plot's title
     :param xlabel: plot's x label
     :param ylabel: plot's y label

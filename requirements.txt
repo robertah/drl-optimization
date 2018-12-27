@@ -6,3 +6,5 @@ pylab
 tensorflow
 pandas
 scikit-learn
+jupyter
+mujoco-py
