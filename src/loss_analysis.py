@@ -1,5 +1,6 @@
 import numpy as np
-from genetic_2 import Agent
+from genetic.genetic import Agent
+import scipy
 import time
 
 
@@ -37,7 +38,7 @@ def interpolate(initial_agent, final_agent, objective, n_steps):
     agent = Agent()
     objective_values = np.apply_along_axis(lambda row: objective(row, agent), axis=1, arr=new_weights)
 
-    return objective_values
+    return objective_values, alphas 
 
 
 def from_agent_to_weights(agent):
@@ -48,6 +49,7 @@ def from_agent_to_weights(agent):
             layer = layer.reshape(layer.shape[0]*layer.shape[1],)
         flattened_weights.extend(layer.tolist())
     return np.array(flattened_weights)
+
 
 
 def from_weights_to_layers(weights, agent):
@@ -77,19 +79,57 @@ def execute_agent_multiple_times(weights, agent, n_times=20):
     return np.mean(scores)
 
 
+def distances_gen(weights):
+    """
+    We calculate the distances from the average of the weights (as a vector without considering bias) for each generation,
+    distances are calculated between consecutive generations and for each generation from the first one (initialization).
+    :param weights, np.array((n_generations, n_agents, n_weights)) returned by genetic.run_agent_genetic
+    :return:
+        consecutive_dist: list, distances between generation
+        dist_from_init: list, distances from initialization
+    """
+    w_1 = np.mean(agents_weights[:,:,0],1).tolist()
+    w_2 = np.mean(agents_weights[:,:,2],1).tolist()
+    flattened_mean_weights = []
+    for i in range(len(w_1)):
+        w_1[i].reshape(w_1[i].shape[0] * w_1[i].shape[1], )
+        w_2[i].reshape(w_2[i].shape[0] * w_2[i].shape[1], )
+        flattened_mean_weights.append(w_1[i].reshape(w_1[i].shape[0] * w_1[i].shape[1], ).tolist() + w_2[i].reshape(w_2[i].shape[0] * w_2[i].shape[1], ).tolist() )
+    consecutive_dist = []
+    dist_from_init = []
+    for first, second in zip(flattened_mean_weights, flattened_mean_weights[1:]):
+        consecutive_dist.append(scipy.spatial.distance.euclidean(first, second))
+    for i, _ in enumerate(flattened_mean_weights):
+        dist_from_init.append(scipy.spatial.distance.euclidean(flattened_mean_weights[0], flattened_mean_weights[i]))
+
+    return consecutive_dist, dist_from_init
+
+
 if __name__ == '__main__':
-    from genetic import run_agent_genetic
+    from genetic.genetic import run_agent_genetic
     import matplotlib.pyplot as plt
 
-    _, _, children = run_agent_genetic(n_agents=50, n_generations=50)
+    agents_weights, scores, children = run_agent_genetic(n_agents=10, n_generations=12)
+
     initial_agent = Agent(weights=children[0])
     final_agent = Agent(weights=children[-1])
+    consecutive_dist, dist_init = distances_gen(agents_weights)
+    inter_results, alphas = interpolate(initial_agent, final_agent, execute_agent_multiple_times, n_steps=40)
+    #np.save("run_results", run_results)
+    np.save("interpolation_results", inter_results)
 
-    print("training_finished")
+    plt.scatter( alphas, inter_results)
+    plt.ylabel('Mean score')
+    plt.xlabel('Alpha')
+    plt.grid(True)
+    plt.title('Linear interpolation initial and final agent')
+    plt.show()
 
-    results = interpolate(initial_agent, final_agent, execute_agent_multiple_times, n_steps=40)
-
-    np.save("interpolation_results", results)
-
-    plt.plot(results)
+    plt.plot([x / max(consecutive_dist) for x in consecutive_dist], 'r', label='Dist consecutive gen')
+    plt.plot([x / max(dist_init) for x in dist_init], 'b', label='Dist from init')
+    plt.ylabel('Distance')
+    plt.xlabel('Generation')
+    plt.grid(True)
+    plt.legend()
+    plt.title('Distance of mean weights between generations ')
     plt.show()
