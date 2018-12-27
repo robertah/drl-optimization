@@ -1,5 +1,4 @@
 import numpy as np
-from genetic.genetic import Agent
 import scipy
 import time
 
@@ -106,10 +105,14 @@ def distances_gen(weights):
 
 
 if __name__ == '__main__':
-    from genetic.genetic import run_agent_genetic
+    from genetic import run_agent_genetic
+    from genetic.agent import Agent
     import matplotlib.pyplot as plt
+    import os
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+    os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
-    agents_weights, scores, children = run_agent_genetic(n_agents=10, n_generations=12)
+    agents_weights, scores, children = run_agent_genetic(n_agents=10, n_generations=3)
 
     initial_agent = Agent(weights=children[0])
     final_agent = Agent(weights=children[-1])
@@ -118,7 +121,7 @@ if __name__ == '__main__':
     #np.save("run_results", run_results)
     np.save("interpolation_results", inter_results)
 
-    plt.scatter( alphas, inter_results)
+    plt.scatter(alphas, inter_results)
     plt.ylabel('Mean score')
     plt.xlabel('Alpha')
     plt.grid(True)

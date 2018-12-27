@@ -1,0 +1,17 @@
+random_seed: 42
+
+# POSSIBLE ENVIRONMENTS:
+# - CartPole-v1
+# - Walker2d-v2
+
+environment:
+  name: 'CartPole-v1'
+  max_time: 2000
+  animate: False
+
+genetic_algorithm:
+  mutation_noise: 0.1
+
+results:
+  path: 'results'
+  scores: 'scores'

@@ -8,3 +8,4 @@ pandas
 scikit-learn
 jupyter
 mujoco-py
+yaml

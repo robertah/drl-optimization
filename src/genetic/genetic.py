@@ -7,74 +7,74 @@ Original file is located at
     https://colab.research.google.com/drive/1SjH7SLZuhPFiD00JbG2pf4iOT_EFBiPP
 """
 
-import gym
-import numpy as np
-from keras.layers import Dense
-from keras.models import Sequential
+from datetime import datetime
 
+import numpy as np
+
+from config import ENVIRONMENT, RESULTS_SCORES
+from .agent import Agent
 from .genetic_functions import crossover_function, generate_population
 
 
-class Agent:
+# class Agent:
+#
+#     def __init__(self, env=gym.make('CartPole-v1'), weights=None):
+#         # if you want to see Cartpole learning, then change to True
+#         self.max_time = 2000
+#         self.env = env
+#         # In case of CartPole-v1, maximum length of episode is 500
+#         self.env._max_episode_steps = 2000
+#         # score_logger = ScoreLogger('CartPole-v1')
+#         # get size of state and action from environment
+#         self.state_size = env.observation_space.shape[0]
+#         self.action_size = env.action_space.n
+#         self.render = False
+#         self.load_model = False
+#         # get size of state and action
+#         self.value_size = 1
+#         # create model for policy network
+#         self.model = self.build_model()
+#         if weights is not None:
+#             self.model.set_weights(weights)
+#
+#     def build_model(self):
+#         model = Sequential()
+#         model.add(Dense(24, input_dim=self.state_size, activation='relu',
+#                         kernel_initializer='he_uniform', name="input"))
+#         model.add(Dense(self.action_size, activation='softmax',
+#                         kernel_initializer='he_uniform', name="output"))
+#         # model.summary()
+#         return model
+#
+#     def get_action(self, state):
+#         policy = self.model.predict(state, batch_size=1).flatten()
+#         # secondo me non ha molto senso fare una multinomial perchè ora non stiamo trainando niente quindi è solo una cosa deterministica che sceglie l'azione in base alla policy, dall'esploration non trarrebbe effettivamente nessun vantaggio se non eventualmente un punteggio più alto dovuto alla casualità del sampling e che quindi non rispecchia proprimanete la policy e lo stesso per un punteggio più basso.
+#         # per questo prenderei soltanto l'azione con la probabilità maggiore
+#         # return np.random.choice(self.action_size, 1, p=policy)[0]
+#         return np.argmax(policy)
+#
+#     def run_agent(self):
+#         done = False
+#         score = 0
+#         state = self.env.reset()
+#         state = np.reshape(state, [1, self.state_size])
+#         # print("intial state: ",state)
+#         while (not done) and (score < self.max_time):
+#             if self.render:
+#                 self.env.render()
+#
+#             action = self.get_action(state)
+#             next_state, reward, done, info = self.env.step(action)
+#             next_state = np.reshape(next_state, [1, self.state_size])
+#             score += reward
+#             state = next_state
+#
+#             if done:
+#                 return score
 
-    def __init__(self, env=gym.make('CartPole-v1'), weights=None):
-        # if you want to see Cartpole learning, then change to True
-        self.max_time = 2000
-        self.env = env
-        # In case of CartPole-v1, maximum length of episode is 500
-        self.env._max_episode_steps = 2000
-        # score_logger = ScoreLogger('CartPole-v1')
-        # get size of state and action from environment
-        self.state_size = env.observation_space.shape[0]
-        self.action_size = env.action_space.n
-        self.render = False
-        self.load_model = False
-        # get size of state and action
-        self.value_size = 1
-        # create model for policy network
-        self.model = self.build_model()
-        if weights is not None:
-            self.model.set_weights(weights)
 
-    def build_model(self):
-        model = Sequential()
-        model.add(Dense(24, input_dim=self.state_size, activation='relu',
-                        kernel_initializer='he_uniform', name="input"))
-        model.add(Dense(self.action_size, activation='softmax',
-                        kernel_initializer='he_uniform', name="output"))
-        # model.summary()
-        return model
-
-    def get_action(self, state):
-        policy = self.model.predict(state, batch_size=1).flatten()
-        # secondo me non ha molto senso fare una multinomial perchè ora non stiamo trainando niente quindi è solo una cosa deterministica che sceglie l'azione in base alla policy, dall'esploration non trarrebbe effettivamente nessun vantaggio se non eventualmente un punteggio più alto dovuto alla casualità del sampling e che quindi non rispecchia proprimanete la policy e lo stesso per un punteggio più basso.
-        # per questo prenderei soltanto l'azione con la probabilità maggiore
-        # return np.random.choice(self.action_size, 1, p=policy)[0]
-        return np.argmax(policy)
-
-    def run_agent(self):
-        done = False
-        score = 0
-        state = self.env.reset()
-        state = np.reshape(state, [1, self.state_size])
-        # print("intial state: ",state)
-        while (not done) and (score < self.max_time):
-            if self.render:
-                self.env.render()
-
-            action = self.get_action(state)
-            next_state, reward, done, info = self.env.step(action)
-            next_state = np.reshape(next_state, [1, self.state_size])
-            score += reward
-            state = next_state
-
-            if done:
-                return score
-
-
-def run_agent_genetic(env=gym.make('CartPole-v1'), n_agents=50, n_generations=100):
-
-    n_weights = len(Agent(env).model.get_weights())
+def run_agent_genetic(n_agents=50, n_generations=100):
+    n_weights = len(Agent().model.get_weights())
 
     agents_weights = np.empty((n_generations, n_agents, n_weights), dtype=np.ndarray)
     scores = np.empty((n_generations, n_agents), dtype=float)
@@ -82,9 +82,10 @@ def run_agent_genetic(env=gym.make('CartPole-v1'), n_agents=50, n_generations=10
     children = np.empty((n_generations, n_weights), dtype=np.ndarray)
 
     # initialize agents
-    agents = [Agent(env) for _ in range(n_agents)]
+    agents = [Agent() for _ in range(n_agents)]
 
     for i in range(n_generations):
+        print("generation:", i)
         agents_weights[i] = np.array([a.model.get_weights() for a in agents], dtype=np.ndarray)
 
         for j, agent in enumerate(agents):  # TODO parallelize
@@ -93,5 +94,7 @@ def run_agent_genetic(env=gym.make('CartPole-v1'), n_agents=50, n_generations=10
         child = crossover_function(agents, scores[i])
         children[i] = np.array(child, dtype=np.ndarray).reshape(n_weights)
         agents = generate_population(child, n_agents, agents)
+
+    np.save(RESULTS_SCORES + '/{}-{}'.format(ENVIRONMENT.name, datetime.now().strftime('%Y%m%d%H%M%S')), scores)
 
     return agents_weights, scores, children
