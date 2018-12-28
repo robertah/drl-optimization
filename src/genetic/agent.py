@@ -26,7 +26,6 @@ class Agent:
             self.action_size = self.env.action_space.shape[0]
         if RANDOM_SEED:
             self.env.seed(RANDOM_SEED)
-        self.render = ENVIRONMENT.animate
         self.load_model = False  # TODO not used
         # get size of state and action
         self.value_size = 1  # TODO not used
@@ -53,14 +52,14 @@ class Agent:
         # return np.random.choice(self.action_size, 1, p=policy)[0]
         return np.argmax(policy)
 
-    def run_agent(self):
+    def run_agent(self, render=ENVIRONMENT.animate):
         done = False
         score = 0
         state = self.env.reset()
         state = np.reshape(state, [1, self.state_size])
         # print("intial state: ",state)
         while (not done) and (score < self.max_time):
-            if self.render:
+            if render:
                 self.env.render()
 
             action = self.get_action(state)
@@ -71,3 +70,4 @@ class Agent:
 
             if done:
                 return score
+

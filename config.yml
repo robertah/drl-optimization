@@ -15,3 +15,6 @@ genetic_algorithm:
 results:
   path: 'results'
   scores: 'scores'
+  weights: 'weights'
+
+logger: 'logs.log'

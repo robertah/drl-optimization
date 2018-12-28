@@ -7,13 +7,11 @@ Original file is located at
     https://colab.research.google.com/drive/1SjH7SLZuhPFiD00JbG2pf4iOT_EFBiPP
 """
 
-from datetime import datetime
-
 import numpy as np
 
-from config import ENVIRONMENT, RESULTS_SCORES
 from .agent import Agent
 from .genetic_functions import crossover_function, generate_population
+from src.utils import save_results
 
 
 # class Agent:
@@ -73,7 +71,7 @@ from .genetic_functions import crossover_function, generate_population
 #                 return score
 
 
-def run_agent_genetic(n_agents=50, n_generations=100):
+def run_agent_genetic(n_agents=50, n_generations=100, save=True):
     n_weights = len(Agent().model.get_weights())
 
     agents_weights = np.empty((n_generations, n_agents, n_weights), dtype=np.ndarray)
@@ -85,7 +83,6 @@ def run_agent_genetic(n_agents=50, n_generations=100):
     agents = [Agent() for _ in range(n_agents)]
 
     for i in range(n_generations):
-        print("generation:", i)
         agents_weights[i] = np.array([a.model.get_weights() for a in agents], dtype=np.ndarray)
 
         for j, agent in enumerate(agents):  # TODO parallelize
@@ -95,6 +92,7 @@ def run_agent_genetic(n_agents=50, n_generations=100):
         children[i] = np.array(child, dtype=np.ndarray).reshape(n_weights)
         agents = generate_population(child, n_agents, agents)
 
-    np.save(RESULTS_SCORES + '/{}-{}'.format(ENVIRONMENT.name, datetime.now().strftime('%Y%m%d%H%M%S')), scores)
+    if save:
+        save_results(agents_weights, scores)
 
     return agents_weights, scores, children

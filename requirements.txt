@@ -2,10 +2,9 @@ gym
 keras
 matplotlib
 numpy
-pylab
 tensorflow
 pandas
 scikit-learn
 jupyter
 mujoco-py
-yaml
+scipy
