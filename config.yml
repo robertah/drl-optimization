@@ -17,4 +17,8 @@ results:
   scores: 'scores'
   weights: 'weights'
 
+visualization:
+  path: 'visualization'
+  weights: 'weights'
+
 logger: 'logs.log'

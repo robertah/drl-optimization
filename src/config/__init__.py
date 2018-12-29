@@ -18,4 +18,6 @@ GA_MUTATION_NOISE = config['genetic_algorithm']['mutation_noise']
 RESULTS_SCORES = os.path.join(ROOT_DIR, config['results']['path'], config['results']['scores'])
 RESULTS_WEIGHTS = os.path.join(ROOT_DIR, config['results']['path'], config['results']['weights'])
 
+VISUALIZATION_WEIGHTS = os.path.join(ROOT_DIR, config['visualization']['path'], config['visualization']['weights'])
+
 LOGGER = config['logger']
