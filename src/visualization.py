@@ -55,10 +55,9 @@ def plot_weights_2d(weights, scores, title='Weights Evolution', save=False):
     ymin, ymax = np.min(weights_2d[:, :, 1]), np.max(weights_2d[:, :, 1])
     ax.set(xlim=(xmin, xmax), ylim=(ymin, ymax))
 
-    mask = scores
     norm = Normalize(0, scores.max())
     colormap = cm.ScalarMappable(norm, 'magma_r')
-    colors = colormap.to_rgba(mask)
+    colors = colormap.to_rgba(scores)
 
     scatter = ax.scatter(weights_2d[0, :, 0], weights_2d[0, :, 1], c=scores[0], cmap='magma_r', vmin=0, vmax=scores.max())
     gen = ax.text(int(xmax - abs(xmax - xmin) / 2), int(ymax), "Generation: 0")

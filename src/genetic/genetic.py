@@ -11,7 +11,9 @@ import numpy as np
 
 from .agent import Agent
 from .genetic_functions import crossover_function, generate_population
-from src.utils import save_results
+import sys
+sys.path.append("..")
+from utils import save_results
 
 
 # class Agent:
