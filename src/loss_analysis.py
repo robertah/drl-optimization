@@ -1,6 +1,7 @@
 import numpy as np
 import scipy
 import time
+import numdifftools as nd
 
 
 def interpolate(initial_agent, final_agent, objective, n_steps):
@@ -87,8 +88,8 @@ def distances_gen(weights):
         consecutive_dist: list, distances between generation
         dist_from_init: list, distances from initialization
     """
-    w_1 = np.mean(agents_weights[:,:,0],1).tolist()
-    w_2 = np.mean(agents_weights[:,:,2],1).tolist()
+    w_1 = np.mean(weights[:,:,0],1).tolist()
+    w_2 = np.mean(weights[:,:,2],1).tolist()
     flattened_mean_weights = []
     for i in range(len(w_1)):
         w_1[i].reshape(w_1[i].shape[0] * w_1[i].shape[1], )
@@ -104,6 +105,39 @@ def distances_gen(weights):
     return consecutive_dist, dist_from_init
 
 
+def compute_hessian(loss_f, point):
+    hessian = nd.Hessian(loss_f)(point)
+    return hessian
+
+
+def get_top_eigenvector(hessian):
+    eigvalues, eigvectors = np.linalg.eig(hessian)
+    # order eigenvalues in descending order
+    orderded_indices = np.argsort(eigvalues)[::-1]
+    # get the eigenvectors corresponding to the top 2 eigenvalues
+    max_eigvector = eigvectors[:, orderded_indices[0]]
+    second_max_eig_vector = eigvectors[:, orderded_indices[1]]
+    return max_eigvector, second_max_eig_vector
+
+
+def plot_loss_along_eigenvectors(final_agent, n_times=2):
+
+    final_weights = from_agent_to_weights(final_agent)
+
+    def run_agent_multiple_times(final_weights):
+        score = execute_agent_multiple_times(final_weights, final_agent, n_times=n_times)
+        return score
+
+    print("computing hessian")
+    h = compute_hessian(run_agent_multiple_times, final_weights)
+    print("hessian computed: ")
+    print(h)
+    v1, v2 = get_top_eigenvector(h)
+
+    # TODO compute plotting along v1 and v2
+    return v1,v2
+
+
 if __name__ == '__main__':
     from genetic import run_agent_genetic
     from genetic.agent import Agent
@@ -112,10 +146,14 @@ if __name__ == '__main__':
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
-    agents_weights, scores, children = run_agent_genetic(n_agents=10, n_generations=3)
+    agents_weights, scores, children = run_agent_genetic(n_agents=10, n_generations=10)
 
     initial_agent = Agent(weights=children[0])
     final_agent = Agent(weights=children[-1])
+
+    v1, v2 = plot_loss_along_eigenvectors(final_agent)
+    print(v1,v2)
+
     consecutive_dist, dist_init = distances_gen(agents_weights)
     inter_results, alphas = interpolate(initial_agent, final_agent, execute_agent_multiple_times, n_steps=40)
     #np.save("run_results", run_results)
