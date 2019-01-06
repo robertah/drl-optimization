@@ -111,3 +111,5 @@ venv.bak/
 *.npy
 *.log
 *.gif
+
+!CartPole-v1-20190103183514.npy

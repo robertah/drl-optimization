@@ -10,7 +10,7 @@ from config import ENVIRONMENT, RANDOM_SEED
 class Agent:
 
     def __init__(self, weights=None):
-        self.env = gym.make(ENVIRONMENT.name)
+        self.env = ENVIRONMENT.env
         # In case of CartPole-v1, maximum length of episode is 500
         self.max_time = ENVIRONMENT.max_time
         self.env._max_episode_steps = 2000  # TODO cos'è?
@@ -37,10 +37,10 @@ class Agent:
     def build_model(self):
         model = Sequential()
         model.add(Dense(ENVIRONMENT.hidden_units[0], input_dim=self.state_size, activation='relu',
-                        kernel_initializer='he_uniform'))
+                        kernel_initializer='glorot_uniform'))
         if len(ENVIRONMENT.hidden_units) > 1:
             for i in range(1, len(ENVIRONMENT.hidden_units)):
-                model.add(Dense(ENVIRONMENT.hidden_units[i], activation='relu', kernel_initializer='he_uniform'))
+                model.add(Dense(ENVIRONMENT.hidden_units[i], activation='relu', kernel_initializer='glorot_uniform'))
         model.add(Dense(self.action_size, activation='softmax', kernel_initializer='he_uniform'))
         # model.summary()
         return model
@@ -53,21 +53,25 @@ class Agent:
         return np.argmax(policy)
 
     def run_agent(self, render=ENVIRONMENT.animate):
-        done = False
-        score = 0
-        state = self.env.reset()
-        state = np.reshape(state, [1, self.state_size])
-        # print("intial state: ",state)
-        while (not done) and (score < self.max_time):
-            if render:
-                self.env.render()
+        scores = []
+        n_times = 3
 
-            action = self.get_action(state)
-            next_state, reward, done, info = self.env.step(action)
-            next_state = np.reshape(next_state, [1, self.state_size])
-            score += reward
-            state = next_state
+        for i in range(n_times):
+            done = False
+            score = 0
+            state = self.env.reset()
+            state = np.reshape(state, [1, self.state_size])
+            # print("intial state: ",state)
+            while (not done) and (score < self.max_time):
+                if render:
+                    self.env.render()
 
-            if done:
-                return score
+                action = self.get_action(state)
+                next_state, reward, done, info = self.env.step(action)
+                next_state = np.reshape(next_state, [1, self.state_size])
+                score += reward
+                state = next_state
 
+                if done:
+                    scores.append(score)
+        return np.mean(scores)

@@ -56,15 +56,25 @@ def get_results(timestamp=None):
     return weights, scores
 
 
-def get_best_agent(timestamp=None):
+def get_best_agent(mean=True, timestamp=None):
     """
     Get weights of the agent which achieved the highest score in the last generation
 
+    :param mean: use mean of the best agents as weights, otherwise use one of the best agents
+    :type mean: bool
     :param timestamp: datetime of a specific run (see also :func:`get_results`)
     :type timestamp: str
 
     :return: weights of the best performing agent
     """
-
     weights, scores = get_results(timestamp)
-    return weights[-1][np.argmax(scores[-1])]
+    if mean:
+        last_scores = scores[-1]
+        best_scores = np.where(last_scores == np.max(last_scores))
+        best_weights = weights[-1][best_scores]
+        weights_final = np.empty(best_weights[0].shape, dtype=np.ndarray)
+        for i in range(len(best_weights[0])):
+            weights_final[i] = np.mean(best_weights[:, i])
+    else:
+        weights_final = weights[-1][np.argmax(scores[-1])]
+    return weights_final

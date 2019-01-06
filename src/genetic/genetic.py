@@ -10,7 +10,7 @@ Original file is located at
 import numpy as np
 
 from .agent import Agent
-from .genetic_functions import crossover_function, generate_population
+from .genetic_functions import crossover_function, generate_population, terminate
 import sys
 sys.path.append("..")
 from utils import save_results
@@ -85,14 +85,17 @@ def run_agent_genetic(n_agents=50, n_generations=100, save=True):
     agents = [Agent() for _ in range(n_agents)]
 
     for i in range(n_generations):
-        agents_weights[i] = np.array([a.model.get_weights() for a in agents], dtype=np.ndarray)
+        if not terminate(scores, score_threshold=2000, perc_threshold=0.95, n_consecutive=5):
+            agents_weights[i] = np.array([a.model.get_weights() for a in agents], dtype=np.ndarray)
 
-        for j, agent in enumerate(agents):  # TODO parallelize
-            scores[i][j] = agent.run_agent()
+            for j, agent in enumerate(agents):  # TODO parallelize
+                scores[i][j] = agent.run_agent()
 
-        child = crossover_function(agents, scores[i])
-        children[i] = np.array(child, dtype=np.ndarray).reshape(n_weights)
-        agents = generate_population(child, n_agents, agents)
+            child = crossover_function(agents, scores[i])
+            children[i] = np.array(child, dtype=np.ndarray).reshape(n_weights)
+            agents = generate_population(child, n_agents, agents)
+        else:
+            break
 
     if save:
         save_results(agents_weights, scores)

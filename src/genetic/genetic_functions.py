@@ -82,3 +82,32 @@ def generate_population_2(child_model1, child_model2, num_children, agents):
     agents[-2].model.set_weights(child_model1.model.get_weights())
     agents[-1].model.set_weights(child_model2.model.get_weights())
     return agents
+
+
+def terminate(scores, score_threshold=2000, perc_threshold=0.95, n_consecutive=5):
+    """
+    Check if conditions to terminate genetic algorithm are satified:
+    terminate genetic, if ``perc_threshold`` of total agents have scored the ``score_threshold``, in the last
+    ``n_consecutive`` runs.
+
+    :param scores: array of scores updated to current generation
+    :type scores: np.ndarray of shape (n_generations, n_agents)
+    :param score_threshold: maximum score
+    :type score_threshold: int or float
+    :param perc_threshold: percentage of agents that should reach the ``score_threshold``
+    :type perc_threshold: float between 0 and 1
+    :param n_consecutive: number of last consecutive generations
+    :type n_consecutive: int
+    :return:
+    """
+    assert 0 < perc_threshold <= 1
+
+    if scores.shape[0] >= n_consecutive:
+        n_agents = scores.shape[1]
+        last_runs = scores[-n_consecutive:]
+        max_scores_count = [np.count_nonzero(s == score_threshold) for s in last_runs]
+        if all(msc > n_agents*perc_threshold for msc in max_scores_count):
+            return True
+        else:
+            return False
+    return False
