@@ -10,7 +10,7 @@ from config import ENVIRONMENT, RANDOM_SEED
 class Agent:
 
     def __init__(self, weights=None):
-        self.env = gym.make(ENVIRONMENT.name)
+        self.env = ENVIRONMENT.env
         # In case of CartPole-v1, maximum length of episode is 500
         self.max_time = ENVIRONMENT.max_time
         self.env._max_episode_steps = 2000  # TODO cos'è?
@@ -54,7 +54,7 @@ class Agent:
 
     def run_agent(self, render=ENVIRONMENT.animate):
         scores = []
-        n_times = 8
+        n_times = 3
 
         for i in range(n_times):
             done = False
