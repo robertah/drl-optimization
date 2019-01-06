@@ -5,7 +5,7 @@ random_seed: 42
 # - Walker2d-v2
 
 environment:
-  name: 'CartPole-v1'
+  name: 'Walker2d-v2'
   max_time: 2000
   animate: False
 

@@ -12,11 +12,11 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # perturbate_weights(weights)
 
 
-agents = Population(population_size=50,  # n agents
-                    max_generations=100,  # max n generations
+agents = Population(population_size=80,  # n agents
+                    max_generations=500,  # max n generations
                     n_selected=0.3,  # n agents selected for crossover
-                    mutation_rate=0.3,  # probability of mutation
+                    mutation_rate=0.2,  # probability of mutation
                     mutation_noise=1,  # gaussian noise scale for mutation
-                    elite=2  # n best agents kept for next generation
+                    elite=3  # n best agents kept for next generation
                     )
 agents.evolve()

@@ -4,6 +4,5 @@ environments:
       - 24
   - name: 'Walker2d-v2'
     n_hidden_units:  # https://arxiv.org/pdf/1710.06117.pdf
-      - 40
-      - 40
-      - 20
+      - 50
+      - 50
