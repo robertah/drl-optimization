@@ -1,0 +1,10 @@
+gym
+keras
+matplotlib
+numpy
+tensorflow
+pandas
+scikit-learn
+jupyter
+mujoco-py
+scipy

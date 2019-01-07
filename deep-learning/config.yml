@@ -1,0 +1,25 @@
+random_seed: 42
+
+# POSSIBLE ENVIRONMENTS:
+# - CartPole-v1
+# - Walker2d-v2
+# - BipedalWalker-v2
+
+environment:
+  name: 'BipedalWalker-v2'
+  max_time: 2000
+  animate: False
+
+genetic_algorithm:
+  mutation_noise: 0.1
+
+results:
+  path: 'results'
+  scores: 'scores'
+  weights: 'weights'
+
+visualization:
+  path: 'visualization'
+  weights: 'weights'
+
+logger: 'logs.log'
