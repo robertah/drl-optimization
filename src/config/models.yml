@@ -5,14 +5,12 @@ environments:
       - 24
     activations:
       - 'relu'
-      - 'softmax'
 
   - name: 'BipedalWalker-v2'
     n_hidden_units:
-      - 48
-      - 24
+      - 128
+      - 128
     activations:
-      - 'tanh'
       - 'tanh'
       - 'tanh'
 
@@ -23,4 +21,3 @@ environments:
     activations:
       - 'relu'
       - 'relu'
-      - 'softmax'

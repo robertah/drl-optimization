@@ -1,6 +1,7 @@
 import os
 
 from genetic import Population
+from config import GA
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -12,11 +13,11 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # perturbate_weights(weights)
 
 
-agents = Population(population_size=50,  # n agents
-                    max_generations=500,  # max n generations
-                    n_selected=0.3,  # n agents selected for crossover
-                    mutation_rate=0.1,  # probability of mutation
-                    mutation_noise=0.5,  # gaussian noise scale for mutation
-                    elite=3  # n best agents kept for next generation
+agents = Population(population_size=GA.population_size,  # n agents
+                    max_generations=GA.max_generations,  # max n generations
+                    n_selected=GA.selected,  # n agents selected for crossover
+                    mutation_rate=GA.mutation_rate,  # probability of mutation
+                    mutation_noise=GA.mutation_noise,  # gaussian noise scale for mutation
+                    elite=GA.elite  # n best agents kept for next generation
                     )
 agents.evolve()

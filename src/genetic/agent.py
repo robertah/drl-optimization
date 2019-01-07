@@ -47,7 +47,7 @@ class Agent:
                 )
                 )
 
-        model.add(Dense(self.env.action_size, activation='tanh', kernel_initializer='he_uniform'))
+        model.add(Dense(self.env.action_size, activation='softmax', kernel_initializer='he_uniform'))
         # model.summary()
         return model
 

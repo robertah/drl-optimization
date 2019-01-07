@@ -21,7 +21,7 @@ class EnvironmentConfig:
         self.animate = environment['animate']
         for e in models['environments']:
             if e['name'] == self.name:
-                if len(e['n_hidden_units']) != (len(e['activations']) - 1):
+                if len(e['n_hidden_units']) != len(e['activations']):
                     raise ValueError("List of hidden units and list of activation functions are not consistent.")
                 self.hidden_units = e['n_hidden_units']
                 self.activations = e['activations']

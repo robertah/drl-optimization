@@ -8,12 +8,12 @@ random_seed: 42
 environment:
   name: 'BipedalWalker-v2'
   max_time: 2000
-  n_runs_per_agent: 2
+  n_runs_per_agent: 3
   animate: False
 
 genetic_algorithm:
   population_size: 50
-  max_generations: 600
+  max_generations: 1000
   n_selected: 0.3
   mutation_rate: 0.2
   mutation_noise: 1
