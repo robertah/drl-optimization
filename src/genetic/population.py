@@ -128,12 +128,14 @@ class Population:
                 new_generation[i + j + 1] = b
         return new_generation
 
-    def terminate(self, score_threshold=2000, perc_threshold=0.95, n_consecutive=5):
+    def terminate(self, generation, score_threshold=2000, perc_threshold=0.95, n_consecutive=5):
         """
         Check if conditions to terminate genetic algorithm are satified:
         terminate genetic, if ``perc_threshold`` of total agents have scored the ``score_threshold``, in the last
         ``n_consecutive`` runs.
 
+        :param generation: generation index
+        :type generation: int
         :param scores: array of scores updated to current generation
         :type scores: np.ndarray of shape (n_generations, n_agents)
         :param score_threshold: maximum score
@@ -146,13 +148,12 @@ class Population:
         """
         assert 0 < perc_threshold <= 1
 
-        if self.scores.shape[0] >= n_consecutive:
-            last_runs = self.scores[-n_consecutive:]
+        if generation >= n_consecutive:
+            last_runs = self.scores[generation-n_consecutive:generation]
             max_scores_count = [np.count_nonzero(s == score_threshold) for s in last_runs]
+            print(max_scores_count)
             if all(msc > self.population_size * perc_threshold for msc in max_scores_count):
                 return True
-            else:
-                return False
         return False
 
     def evolve(self, save=True):
@@ -167,7 +168,7 @@ class Population:
 
         for i in range(self.max_generations):
             print("\n generation", i)
-            if not self.terminate():
+            if not self.terminate(i):
                 self.agents_weights[i] = np.array([a.model.get_weights() for a in agents], dtype=np.ndarray)
 
                 for j, agent in enumerate(agents):  # TODO parallelize
@@ -177,8 +178,8 @@ class Population:
                 print("mean {} - max {}".format(np.mean(self.scores[i]), np.max(self.scores[i])))
 
                 new_agents = self.generate_next_generation(i)
-                for i, a in enumerate(agents):
-                    agents[i].model.set_weights(new_agents[i])
+                for k, a in enumerate(agents):
+                    agents[k].model.set_weights(new_agents[k])
 
             else:
                 print(i)
