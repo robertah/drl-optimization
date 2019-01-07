@@ -7,7 +7,6 @@ random_seed: 42
 
 environment:
   name: 'BipedalWalker-v2'
-  max_time: 2000
   n_runs_per_agent: 3
   animate: False
 

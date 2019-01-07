@@ -5,6 +5,7 @@ environments:
       - 24
     activations:
       - 'relu'
+    max_time: 2000
 
   - name: 'BipedalWalker-v2'
     n_hidden_units:
@@ -13,6 +14,7 @@ environments:
     activations:
       - 'tanh'
       - 'tanh'
+    max_time: 10000
 
   - name: 'Walker2d-v2'
     n_hidden_units:  # https://arxiv.org/pdf/1710.06117.pdf
@@ -21,3 +23,4 @@ environments:
     activations:
       - 'relu'
       - 'relu'
+    max_time: 10000

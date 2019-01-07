@@ -17,7 +17,6 @@ class EnvironmentConfig:
         if random_seed:
             self.env.seed(random_seed)
         self.n_runs = environment['n_runs_per_agent']
-        self.max_time = environment['max_time']
         self.animate = environment['animate']
         for e in models['environments']:
             if e['name'] == self.name:
@@ -25,3 +24,4 @@ class EnvironmentConfig:
                     raise ValueError("List of hidden units and list of activation functions are not consistent.")
                 self.hidden_units = e['n_hidden_units']
                 self.activations = e['activations']
+                self.max_time = e['max_time']
