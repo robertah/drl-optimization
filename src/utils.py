@@ -5,7 +5,7 @@ from datetime import datetime
 from config import ENVIRONMENT, RESULTS_SCORES, RESULTS_WEIGHTS
 
 
-def save_results(weights, scores):
+def save_results(weights, scores, timestamp=datetime.now().strftime('%Y%m%d%H%M%S')):
     """
     Save agent weights and scores as numpy arrays
 
@@ -13,11 +13,13 @@ def save_results(weights, scores):
     :type weights: np.ndarray
     :param scores: agent scores
     :type scores: np.ndarray
+    :param timestamp: run's datetime
+    :type timestamp: str
     """
 
     assert len(weights) == len(scores)
-    np.save(RESULTS_SCORES + '/{}-{}'.format(ENVIRONMENT.name, datetime.now().strftime('%Y%m%d%H%M%S')), scores)
-    np.save(RESULTS_WEIGHTS + '/{}-{}'.format(ENVIRONMENT.name, datetime.now().strftime('%Y%m%d%H%M%S')), weights)
+    np.save(RESULTS_SCORES + '/{}-{}'.format(ENVIRONMENT.name, timestamp), scores)
+    np.save(RESULTS_WEIGHTS + '/{}-{}'.format(ENVIRONMENT.name, timestamp), weights)
 
 
 def get_results(timestamp=None):

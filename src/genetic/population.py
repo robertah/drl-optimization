@@ -1,10 +1,11 @@
 import sys
 import numpy as np
+from datetime import datetime
 from .agent import Agent
 
 sys.path.append("..")
 from utils import save_results
-from config import RANDOM_SEED
+from config import ENVIRONMENT, RANDOM_SEED
 
 if RANDOM_SEED:
     np.random.seed(RANDOM_SEED)
@@ -30,8 +31,8 @@ class Population:
         self.mutation_rate = mutation_rate
         self.mutation_noise = mutation_noise
         self.elite = elite
-        self.agents_weights = np.empty((self.max_generations, self.population_size, len(Agent().model.get_weights())),
-                                       dtype=np.ndarray)
+        weights_size = len(Agent(ENVIRONMENT).model.get_weights())
+        self.agents_weights = np.empty((self.max_generations, self.population_size, weights_size), dtype=np.ndarray)
         self.scores = np.empty((self.max_generations, self.population_size), dtype=float)
 
     def create_population(self):
@@ -40,7 +41,7 @@ class Population:
 
         :return:
         """
-        return [Agent() for _ in range(self.population_size)]
+        return [Agent(ENVIRONMENT) for _ in range(self.population_size)]
 
     def selection(self, generation):
         """
@@ -151,7 +152,6 @@ class Population:
         if generation >= n_consecutive:
             last_runs = self.scores[generation-n_consecutive:generation]
             max_scores_count = [np.count_nonzero(s == score_threshold) for s in last_runs]
-            print(max_scores_count)
             if all(msc > self.population_size * perc_threshold for msc in max_scores_count):
                 return True
         return False
@@ -164,6 +164,9 @@ class Population:
         :type save: bool
         :return:
         """
+
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+
         agents = self.create_population()
 
         for i in range(self.max_generations):
@@ -181,6 +184,9 @@ class Population:
                 for k, a in enumerate(agents):
                     agents[k].model.set_weights(new_agents[k])
 
+                if save and i % 100 == 0:
+                    save_results(self.agents_weights, self.scores, timestamp)
+
             else:
                 print(i)
                 self.agents_weights = self.agents_weights[:i]
@@ -189,7 +195,7 @@ class Population:
                 break
 
         if save:
-            save_results(self.agents_weights, self.scores)
+            save_results(self.agents_weights, self.scores, timestamp)
 
         return self.agents_weights, self.scores
 

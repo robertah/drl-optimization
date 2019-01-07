@@ -2,15 +2,22 @@ random_seed: 42
 
 # POSSIBLE ENVIRONMENTS:
 # - CartPole-v1
+# - BipedalWalker-v2
 # - Walker2d-v2
 
 environment:
-  name: 'CartPole-v1'
+  name: 'BipedalWalker-v2'
   max_time: 2000
+  n_runs_per_agent: 2
   animate: False
 
 genetic_algorithm:
-  mutation_noise: 0.1
+  population_size: 50
+  max_generations: 600
+  n_selected: 0.3
+  mutation_rate: 0.2
+  mutation_noise: 1
+  elite: 3
 
 results:
   path: 'results'
