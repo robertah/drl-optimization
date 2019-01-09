@@ -1,7 +1,9 @@
 import os
 
-from genetic import Population
-from config import GA
+from config import POPULATION, GA, CMA_ES
+from genetic import GeneticAlgorithm
+from CMA_ES import CMAEvolutionStrategies
+from population import Population
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -12,12 +14,16 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # weights = get_best_agent(mean=True, timestamp='20190103183514')
 # perturbate_weights(weights)
 
+ga = GeneticAlgorithm(perc_selected=GA.selected, mutation_rate=GA.mutation_rate,
+                      mutation_noise=GA.mutation_noise, elite=GA.elite)
 
-agents = Population(population_size=GA.population_size,  # n agents
-                    max_generations=GA.max_generations,  # max n generations
-                    n_selected=GA.selected,  # n agents selected for crossover
-                    mutation_rate=GA.mutation_rate,  # probability of mutation
-                    mutation_noise=GA.mutation_noise,  # gaussian noise scale for mutation
-                    elite=GA.elite  # n best agents kept for next generation
-                    )
+cma_es = CMAEvolutionStrategies(perc_selelcted=CMA_ES.selected)
+
+agents = Population(size=POPULATION.size, max_generations=POPULATION.max_generations, optimizer=cma_es)
+
 agents.evolve()
+
+# weights = utils.get_best_agent(mean=False)
+# agent = Agent(ENVIRONMENT, weights)
+# agent.run_agent(render=True)
+# perturbate_weights(weights)

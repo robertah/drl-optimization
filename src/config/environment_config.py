@@ -25,3 +25,4 @@ class EnvironmentConfig:
                 self.hidden_units = e['n_hidden_units']
                 self.activations = e['activations']
                 self.max_time = e['max_time']
+                self.policy = e['policy']

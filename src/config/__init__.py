@@ -1,7 +1,8 @@
 import os
 import yaml
 from .environment_config import EnvironmentConfig
-from .genetic_algorithm_config import GeneticAlgorithmConfig
+from .population_config import PopulationConfig
+from .optimizers_config import *
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', '..'))
 
@@ -14,7 +15,10 @@ with open(os.path.join(ROOT_DIR, 'src', 'config', 'models.yml')) as m:
 RANDOM_SEED = config['random_seed']
 ENVIRONMENT = EnvironmentConfig(config, models, RANDOM_SEED)
 
+POPULATION = PopulationConfig(config)
+
 GA = GeneticAlgorithmConfig(config)
+CMA_ES = CMAEvolutionStrategiesConfig(config)
 
 RESULTS_SCORES = os.path.join(ROOT_DIR, config['results']['path'], config['results']['scores'])
 RESULTS_WEIGHTS = os.path.join(ROOT_DIR, config['results']['path'], config['results']['weights'])

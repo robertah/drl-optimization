@@ -72,7 +72,8 @@ def get_best_agent(mean=True, timestamp=None):
     weights, scores = get_results(timestamp)
     if mean:
         last_scores = scores[-1]
-        best_scores = np.where(last_scores == np.max(last_scores))
+        print(last_scores)
+        best_scores = np.argsort(-last_scores)[:int(0.5 * len(last_scores))]
         best_weights = weights[-1][best_scores]
         weights_final = np.empty(best_weights[0].shape, dtype=np.ndarray)
         for i in range(len(best_weights[0])):
@@ -80,3 +81,16 @@ def get_best_agent(mean=True, timestamp=None):
     else:
         weights_final = weights[-1][np.argmax(scores[-1])]
     return weights_final
+
+
+def print_scores(generation, scores):
+    scores = {
+        'generation': generation,
+        'scores': {
+            'min': round(np.min(scores), 2),
+            'mean': round(np.mean(scores), 2),
+            'max': round(np.max(scores), 2),
+            'std': round(np.std(scores), 2)
+        }
+    }
+    print(scores)
