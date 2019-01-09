@@ -4,6 +4,7 @@ import numpy as np
 import threading
 from .genetic_functions import crossover_function, crossover_function_1, generate_population, crossover_function_2, generate_population_2, crossover_function_1_1, noise, generate_population_1, new_population, new_population_elite
 from utils import save_results
+import tensorflow as tf
 
 def run_agent_genetic( n_agents=50, n_generations=100, save=True):
     n_weights = len(Agent().model.get_weights())
@@ -170,7 +171,7 @@ def run_genetic_no_mean( n_agents=50, n_generations=100, save=True):
             else:
                 scores[i][j] = agent.run_agent(env)
 
-        agents = new_population(agents,scores[i],4)
+        agents = new_population_elite(agents,scores[i],5)
         print('max_rew:', scores[i].max(), 'avarage_rew:', np.average(scores[i]))
         if i in l:
             save_results(scores)
@@ -191,7 +192,7 @@ def run_genetic_no_mean_parallel( n_agents=100, n_generations=300, save=True):
     env1 = Environment()
     env2 = Environment()
     env3 = Environment()
-    n_weights = len(Agent(env1).model.get_weights())
+    #n_weights = len(Agent(env1, graph).model.get_weights())
     n_threads = 4
     #agents_weights = np.empty((n_generations, n_agents, n_weights), dtype=np.ndarray)
     scores = np.empty((n_generations, n_agents), dtype=float)
@@ -199,21 +200,28 @@ def run_genetic_no_mean_parallel( n_agents=100, n_generations=300, save=True):
     #children = np.empty((n_generations, n_weights), dtype=np.ndarray)
     l = [20,40,60,80,100,120]
     # initialize agents
-    agents = [Agent(env1) for _ in range(n_agents)]
+
+    agents = [Agent() for _ in range(n_agents)]
+
 
     for i in range(n_generations):
         #agents_weights[i] = np.array([a.model.get_weights() for a in agents], dtype=np.ndarray)
         print(i)
 
         thread0 = threading.Thread(target=run_some_agents, args=(agents[0: n_agents // n_threads - 1], 0,scores,i,env0))
-        thread1 = threading.Thread(target=run_some_agents, args=(agents[n_agents // n_threads : n_agents * 2 // n_threads -1], 1, scores, i, env1))
-        thread2 = threading.Thread(target=run_some_agents, args=(agents[n_agents*2 // n_threads : n_agents * 3 // n_threads -1], 2, scores, i, env2))
-        thread3 = threading.Thread(target=run_some_agents, args=(agents[n_agents * 3 // n_threads :n_agents - 1], 3, scores, i, env3))
+        #thread1 = threading.Thread(target=run_some_agents, args=(agents[n_agents // n_threads : n_agents * 2 // n_threads -1], 1, scores, i, env1))
+        #thread2 = threading.Thread(target=run_some_agents, args=(agents[n_agents*2 // n_threads : n_agents * 3 // n_threads -1], 2, scores, i, env2))
+        #thread3 = threading.Thread(target=run_some_agents, args=(agents[n_agents * 3 // n_threads :n_agents - 1], 3, scores, i, env3))
 
         thread0.start()
-        thread1.start()
-        thread2.start()
-        thread3.start()
+        #thread1.start()
+        #thread2.start()
+        #thread3.start()
+
+        thread0.join()
+        #thread1.join()
+        #thread2.join()
+        #thread3.join()
 
         agents = new_population(agents,scores[i],5)
 

@@ -166,7 +166,7 @@ def new_population(agents,rewards,best):
             layer_shape = agent.model.get_weights()[i].shape
             mother_father = np.random.choice([0,1],layer_shape)
             new_layer = np.multiply(best_agents[parents[0]].model.get_weights()[i],mother_father) + np.multiply(best_agents[parents[1]].model.get_weights()[i],np.ones(layer_shape)-mother_father)
-            noise = np.multiply(new_layer, np.random.choice([-1, 0, 1], new_layer.shape, p=[0.3,0.4,0.3])) * random.uniform(0, 2)
+            noise = np.multiply(new_layer, np.random.choice([-1, 0, 1], new_layer.shape, p=[0.3,0.4,0.3])) * random.uniform(0, 1)
             new_layer = new_layer + noise
             child_model.append(new_layer)
         agent.model.set_weights(child_model)
@@ -176,8 +176,8 @@ def new_population_elite(agents,rewards,best):
     rewards = np.array(rewards)
     scaled_rewards = np.interp(rewards, (rewards.min(), rewards.max()), (0, 1))
     ordered_indexes = np.argsort(-scaled_rewards)
-    best_agents = [agents[i] for i in ordered_indexes[:best]]
-    new_agents = [agents[i] for i in ordered_indexes[best:]]
+    best_agents = [agents[i] for i in ordered_indexes[:best]] + [agents[random.choice(ordered_indexes[best:])]]
+    new_agents = [agents[i] for i in ordered_indexes[best-3:]]
     best_scaled_norm_rew = scaled_rewards[ordered_indexes[:best]]/np.sum(scaled_rewards[ordered_indexes[:best]])
     num_layers = len(agents[0].model.get_weights())
     for agent in new_agents:
@@ -191,10 +191,32 @@ def new_population_elite(agents,rewards,best):
             new_layer = new_layer + noise
             child_model.append(new_layer)
         agent.model.set_weights(child_model)
-    new_agents = new_agents + best_agents
+    new_agents = new_agents + best_agents[:2]
     return new_agents
 
+#Aggiungerei ai parents un tizio a caso oltre ai 5 best la miglior combinazione dovrebbe essere 4 parents tra i best + 1 a caso e mantenere come i primi due best
 
+def new_population_lucky_guys(agents,rewards,best):
+    rewards = np.array(rewards)
+    scaled_rewards = np.interp(rewards, (rewards.min(), rewards.max()), (0, 1))
+    ordered_indexes = np.argsort(-scaled_rewards)
+    best_agents = [agents[i] for i in ordered_indexes[:best] ]
+    #Add a random lucky parent
+    best_agents = best_agents + agents[random.choice(ordered_indexes[best:])]
+    best_scaled_norm_rew = scaled_rewards[ordered_indexes[:best]]/np.sum(scaled_rewards[ordered_indexes[:best]])
+    num_layers = len(agents[0].model.get_weights())
+    for agent in agents:
+        child_model = []
+        parents = random.sample(range(best+1),2)
+        for i in range(num_layers):
+            layer_shape = agent.model.get_weights()[i].shape
+            mother_father = np.random.choice([0,1],layer_shape)
+            new_layer = np.multiply(best_agents[parents[0]].model.get_weights()[i],mother_father) + np.multiply(best_agents[parents[1]].model.get_weights()[i],np.ones(layer_shape)-mother_father)
+            noise = np.multiply(new_layer, np.random.choice([-1, 0, 1], new_layer.shape, p=[0.3,0.4,0.3])) * random.uniform(0, 1)
+            new_layer = new_layer + noise
+            child_model.append(new_layer)
+        agent.model.set_weights(child_model)
+    return agents
 
 def generate_population(child_model, num_children, agents, noise):
     """

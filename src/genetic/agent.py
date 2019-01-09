@@ -4,7 +4,8 @@ from gym.spaces.discrete import Discrete
 import numpy as np
 from keras.layers import Dense
 from keras.models import Sequential
-
+import tensorflow as tf
+import keras.backend as K
 from config import ENVIRONMENT, RANDOM_SEED
 
 class Environment():
@@ -30,11 +31,15 @@ class Environment():
 
 class Agent():
 
-    def __init__(self, environment, weights=None):
+    def __init__(self, weights=None):
+        self.session = tf.Session(graph=tf.Graph())
+
         # create model for policy network
-        self.model = self.build_model(environment)
-        if weights is not None:
-            self.model.set_weights(weights)
+        #self.model = self.build_model(environment)
+        #if weights is not None:
+        #    self.model.set_weights(weights)
+
+
     '''
         def build_model(self):
             model = Sequential()
@@ -64,14 +69,20 @@ class Agent():
         :param environment:
         :return: model
         '''
+        #graph = tf.Graph()
+        #with tf.Session(graph = graph) as sess:
+        #sess = tf.Session(graph = graph)
+
+        #K.set_session(sess)
         model = Sequential()
-        model.add(Dense(ENVIRONMENT.hidden_units[0], input_dim = environment.state_size, activation='relu',
+        model.add(Dense(ENVIRONMENT.hidden_units[0], input_dim = environment.state_size, activation='tanh',
                         kernel_initializer='he_uniform'))
         if len(ENVIRONMENT.hidden_units) > 1:
             for i in range(1, len(ENVIRONMENT.hidden_units)):
-                model.add(Dense(ENVIRONMENT.hidden_units[i], activation='relu', kernel_initializer='he_uniform'))
+                model.add(Dense(ENVIRONMENT.hidden_units[i], activation='tanh', kernel_initializer='he_uniform'))
         model.add(Dense(environment.action_size, activation='tanh', kernel_initializer='he_uniform'))
         # model.summary()
+        #sess.run(tf.global_variables_initializer())
         return model
 
 
@@ -110,27 +121,32 @@ class Agent():
     def run_agent(self, environment, render=ENVIRONMENT.animate):
         scores = []
         n_times = 1
+        #graph = tf.Graph()
+        #with tf.Session(graph = graph) as sess:
+        #sess = tf.Session(graph = graph)
+        with self.session as sess:
+            K.set_session(sess)
+            self.model = self.build_model(environment)
+            for i in range(n_times):
+                done = False
+                score = 0
+                state = environment.env.reset()
+                state = np.reshape(state, [1, environment.state_size])
+                # print("intial state: ",state)
+                while (not done) and (score < ENVIRONMENT.max_time):
+                    if render:
+                        environment.env.render()
 
-        for i in range(n_times):
-            done = False
-            score = 0
-            state = environment.env.reset()
-            state = np.reshape(state, [1, environment.state_size])
-            # print("intial state: ",state)
-            while (not done) and (score < ENVIRONMENT.max_time):
-                if render:
-                    environment.env.render()
+                    action = self.get_action(state)
+                    next_state, reward, done, info = environment.env.step(action)
+                    next_state = np.reshape(next_state, [1, environment.state_size])
+                    score += reward
+                    # The following if condition is usefull to kill the agent if it is stuck in a position
+                    if np.array_equal(np.around(next_state, 3), np.around(state, 3)):
+                        done = True
+                        return score
+                    state = next_state
 
-                action = self.get_action(state)
-                next_state, reward, done, info = environment.env.step(action)
-                next_state = np.reshape(next_state, [1, environment.state_size])
-                score += reward
-                # The following if condition is usefull to kill the agent if it is stuck in a position
-                if np.array_equal(np.around(next_state, 3), np.around(state, 3)):
-                    done = True
-                    return score
-                state = next_state
-
-                if done:
-                    scores.append(score)
+                    if done:
+                        scores.append(score)
         return np.mean(scores)
