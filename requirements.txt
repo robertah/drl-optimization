@@ -8,3 +8,4 @@ scikit-learn
 jupyter
 mujoco-py
 scipy
+box2d-py

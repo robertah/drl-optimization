@@ -1,8 +1,45 @@
 environments:
+
   - name: 'CartPole-v1'
     n_hidden_units:
       - 24
+    activations:
+      - 'relu'
+    max_time: 2000
+    policy: 'argmax'
+
+  - name: 'Acrobot-v1'
+    n_hidden_units:
+      - 24
+    activations:
+      - 'relu'
+    max_time: 10000
+    policy: 'argmax'
+
+  - name: 'Pendulum-v0'
+    n_hidden_units:
+      - 24
+    activations:
+      - 'relu'
+    max_time: 2000
+    policy: 'normal'
+
+  - name: 'BipedalWalker-v2'
+    n_hidden_units:
+      - 128
+      - 128
+    activations:
+      - 'tanh'
+      - 'tanh'
+    max_time: 10000
+    policy: 'normal'
+
   - name: 'Walker2d-v2'
     n_hidden_units:  # https://arxiv.org/pdf/1710.06117.pdf
       - 50
       - 50
+    activations:
+      - 'relu'
+      - 'relu'
+    max_time: 10000
+    policy: 'normal'
