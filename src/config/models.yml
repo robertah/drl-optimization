@@ -2,7 +2,12 @@ environments:
   - name: 'CartPole-v1'
     n_hidden_units:
       - 24
+  - name: 'BipedalWalker-v2'
+    n_hidden_units:
+      - 128
+      - 128
   - name: 'Walker2d-v2'
     n_hidden_units:  # https://arxiv.org/pdf/1710.06117.pdf
-      - 50
-      - 50
+      - 40
+      - 40
+      - 20

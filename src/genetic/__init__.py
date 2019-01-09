@@ -1,3 +1,2 @@
-from .genetic import run_agent_genetic
+from .genetic import run_agent_genetic, run_agent_genetic_positive, run_agent_genetic_2, run_agent_genetic_alternative, run_genetic_no_mean_parallel, run_genetic_no_mean
 from .agent import Agent
-from .population import Population
