@@ -131,8 +131,16 @@ def plot_loss_along_eigenvectors(final_agent, n_times=2):
     print("computing hessian")
     h = compute_hessian(run_agent_multiple_times, final_weights)
     print("hessian computed: ")
+    try:
+        np.save("hessian", h)
+    except:
+        pass
+
     print(h)
     v1, v2 = get_top_eigenvector(h)
+
+    np.save("v1", v1)
+    np.save("v2", v2)
 
     # TODO compute plotting along v1 and v2
     return v1,v2
@@ -146,7 +154,7 @@ if __name__ == '__main__':
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
-    agents_weights, scores, children = run_agent_genetic(n_agents=10, n_generations=10)
+    agents_weights, scores, children = run_agent_genetic(n_agents=20, n_generations=30)
 
     initial_agent = Agent(weights=children[0])
     final_agent = Agent(weights=children[-1])

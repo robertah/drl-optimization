@@ -8,10 +8,10 @@ if RANDOM_SEED:
 
 def crossover_function(agents, rewards):
     '''
-    agents: a list of keras neural networks (parents agents)
-    rewards: list (or array) of rewards associated to the performance of the
+    :param agents: a list of keras neural networks (parents agents)
+    :param rewards: list (or array) of rewards associated to the performance of the
           corresponding model
-    return: the child weights computed by the weighted average
+    :return: the child weights computed by the weighted average
           of the parents w.r.t. the reward
     '''
     rewards = np.array(rewards)
@@ -29,10 +29,9 @@ def crossover_function(agents, rewards):
 
 def generate_population(child_model, num_children, agents):
     """
-    child_model: model from which building the new population
-    num_children: number of children to generate
-    scale_noise: variance of the gaussian noise to apply
-    agents: list of agents
+    :param child_model: model from which building the new population
+    :param num_children: number of children to generate
+    :param: list of agents
     """
     for child in range(num_children):
         new_child = []
@@ -46,10 +45,10 @@ def generate_population(child_model, num_children, agents):
 
 def crossover_function_2(agents, rewards):
     '''
-    models: a list of keras neural networks (parents agents)
-    rewars: list (or array) of rewards associated to the performance of the
+    :param agents: a list of keras neural networks (parents agents)
+    :param rewards: list (or array) of rewards associated to the performance of the
           corresponding model
-    return: the best two agents
+    :return: the best two agents
     '''
     sorted_indeces = np.argsort(-np.array(rewards))
     best_agent = agents[sorted_indeces[0]]
@@ -60,9 +59,11 @@ def crossover_function_2(agents, rewards):
 
 def generate_population_2(child_model1, child_model2, num_children, agents):
     '''
-    child_model: model from which building the new population
-    num_children: number of children to generate
-    scale_noise: variance of the gaussian noise to apply
+    :param child_model1: model from which building the new population
+    :param child_model2: model from which building the new population
+    :param num_children: number of children to generate
+    :param agents: old agents
+    :return
     '''
 
     for child in range(int(num_children / 2) - 1):
