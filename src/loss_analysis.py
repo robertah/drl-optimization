@@ -1,8 +1,8 @@
 import numpy as np
 import scipy
-import time
-import numdifftools as nd
-
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+from matplotlib import cm
 
 def interpolate(initial_agent, final_agent, objective, n_steps):
     """
@@ -35,7 +35,7 @@ def interpolate(initial_agent, final_agent, objective, n_steps):
 
     new_weights = weighted_initial_weights + weighted_final_weights
     # we need a random agent
-    agent = Agent()
+    agent = Agent(ENVIRONMENT)
     objective_values = np.apply_along_axis(lambda row: objective(row, agent), axis=1, arr=new_weights)
 
     return objective_values, alphas 
@@ -71,11 +71,7 @@ def from_weights_to_layers(weights, agent):
 def execute_agent_multiple_times(weights, agent, n_times=20):
     new_layers = from_weights_to_layers(weights, agent)
     agent.model.set_weights(new_layers)
-    print("one objective: ")
-    start = time.time()
     scores = [agent.run_agent() for _ in range(n_times)]
-    end = time.time()
-    print(end - start)
     return np.mean(scores)
 
 
@@ -105,12 +101,63 @@ def distances_gen(weights):
     return consecutive_dist, dist_from_init
 
 
-def compute_hessian(loss_f, point):
-    hessian = nd.Hessian(loss_f)(point)
+def compute_second_derivative(i1, i2, loss_f, point, epsilon):
+    """
+    computes the second derivative of loss_f in point, with respect to the i1-th and i2-th directions
+    :param i1: first direction
+    :type int
+    :param i2: second direction
+    :type int
+    :param loss_f: function for which we want to compute the second derivative
+    :param point: point of evaluation
+    :param epsilon: approximation constant (should be small)
+    :return: a float number (the second derivative)
+    """
+    p1 = np.copy(point)
+    p2 = np.copy(point)
+    p3 = np.copy(point)
+    p4 = np.copy(point)
+    p1[i1] = point[i1] + epsilon
+    p1[i2] = p1[i2] + epsilon
+    p2[i1] = point[i1] - epsilon
+    p2[i2] = p2[i2] + epsilon
+    p3[i1] = point[i1] + epsilon
+    p3[i2] = p3[i2] - epsilon
+    p4[i1] = point[i1] - epsilon
+    p4[i2] = p4[i2] - epsilon
+    first_d1 = (loss_f(p1) - loss_f(p2))/(2*epsilon)
+    first_d2 = (loss_f(p3) - loss_f(p4))/(2*epsilon)
+    sec_deriv = (first_d1 - first_d2)/(2*epsilon)
+    return sec_deriv
+
+
+def compute_hessian(loss_f, point, epsilon=0.01, file=None):
+    """
+    computes the hessian matrix of function loss_f in the point "point"
+    :param loss_f: the function for which we want to compute the Hessian
+    :param point: the point of evaluation of the hessian
+    :param epsilon: approximation constant to compute the second derivative
+    :param file: if string, after every row of the Hessian is computed, the matrix is saved to disk
+    :return: the Hessian matrix
+    """
+    hessian = np.empty(shape=(point.shape[0], point.shape[0]))
+    for i in range(point.shape[0]):
+        for j in range(point.shape[0]):
+            hessian[i][j] = compute_second_derivative(i, j, loss_f, point, epsilon)
+        print("finished row {}/{}".format(i+1, point.shape[0]))
+        if file is not None:
+            np.save("temp", hessian)
+    if file is not None:
+        np.save(file, hessian)
     return hessian
 
 
 def get_top_eigenvector(hessian):
+    """
+    Finds the eigenvectors corresponding to the two larger eigenvalues
+    :param hessian: the matrix for which we want to compute top eigenvectors
+    :return: the eigenvectors corresponding to the two larger eigenvalues
+    """
     eigvalues, eigvectors = np.linalg.eig(hessian)
     # order eigenvalues in descending order
     orderded_indices = np.argsort(eigvalues)[::-1]
@@ -120,35 +167,84 @@ def get_top_eigenvector(hessian):
     return max_eigvector, second_max_eig_vector
 
 
-def plot_loss_along_eigenvectors(final_agent, n_times=2):
+def plot_surface_3d(X, Y, Z):
+    """
+    plot 3d surface
+    :param X: first axis
+    :param Y: second axis
+    :param Z: function evaluated at each of x,y points
+    :return: the surface, and show the plot
+    """
+    X, Y = np.meshgrid(X, Y)
+    Z = np.array(Z).reshape(X.shape)
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm)
+    plt.show()
+    return surf
 
-    final_weights = from_agent_to_weights(final_agent)
+
+def evaluate_in_neighborhood(f, weights, d1, d2, n_steps=20):
+    """
+    evaluate function f in a neighborhood of it around weights along directions d1 and d2
+    :param f: the function of interest
+    :param weights: the point of evaluation
+    :param d1: the first direction of perturbation
+    :param d2: the second direction of perturbation
+    :param n_steps: the highest, the highest the precision
+    :return: the function evaluated at all the points, and an array containing
+            the magnitudes of perturbation
+    """
+    alphas = np.linspace(-1.0, 1.0, n_steps)
+    scores = []
+    for i,a1 in enumerate(alphas.tolist()):
+        for a2 in alphas.tolist():
+            score = f(weights + d1*a1 + d2*a2)
+            scores.append(score)
+        print("finished step {}/{}".format(i+1, alphas.shape[0]))
+    return np.array(scores), alphas
+
+
+def plot_reward_along_eigenvectors(final_agent, n_times=2, file="hessian", from_file=False):
+    """
+    plots the reward function along the directions of maximum variation of the curvature. These
+    directions are defined by the eigenvectors corresponding to the two largest eigenvalues of the hessian.
+    Use this function to evaluate the robustness of the agent.
+    :param final_agent: the trained agent
+    :param n_times: the reward function has of course no analytical form. Therefore to evaluate it
+                    we run the agent and see the score. We want to take into account different possibile
+                    initial conditions, and we do it by running the agent multiple times and average the scores.
+                    Set this parameter larger than one only if the mapping weights -> reward is not deterministic
+                    or if you may have different initial conditions at each execution.
+    :param file: a file name for the hessian matrix
+    :param from_file: if True, it will read the matrix as specified by the file parameter
+    :return:
+    """
 
     def run_agent_multiple_times(final_weights):
         score = execute_agent_multiple_times(final_weights, final_agent, n_times=n_times)
         return score
 
-    print("computing hessian")
-    h = compute_hessian(run_agent_multiple_times, final_weights)
-    print("hessian computed: ")
-    try:
-        np.save("hessian", h)
-    except:
-        pass
+    final_weights = from_agent_to_weights(final_agent)
+    print("weights number", final_weights.shape)
 
-    print(h)
+    if not from_file:
+        print("computing hessian")
+        h = compute_hessian(run_agent_multiple_times, final_weights, file=file)
+        print("hessian computed: ")
+    else:
+        h = np.load(file + ".npy")
+
     v1, v2 = get_top_eigenvector(h)
-
-    np.save("v1", v1)
-    np.save("v2", v2)
-
-    # TODO compute plotting along v1 and v2
+    scores, alphas = evaluate_in_neighborhood(run_agent_multiple_times, final_weights, v1, v2, n_steps=80)
+    plot_surface_3d(alphas, alphas, scores)
     return v1,v2
 
 
 if __name__ == '__main__':
     from genetic import run_agent_genetic
     from genetic.agent import Agent
+    from config import ENVIRONMENT
     import matplotlib.pyplot as plt
     import os
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -156,10 +252,10 @@ if __name__ == '__main__':
 
     agents_weights, scores, children = run_agent_genetic(n_agents=20, n_generations=30)
 
-    initial_agent = Agent(weights=children[0])
-    final_agent = Agent(weights=children[-1])
+    initial_agent = Agent(ENVIRONMENT, weights=children[0])
+    final_agent = Agent(ENVIRONMENT, weights=children[-1])
 
-    v1, v2 = plot_loss_along_eigenvectors(final_agent)
+    v1, v2 = plot_reward_along_eigenvectors(final_agent, from_file=True)
     print(v1,v2)
 
     consecutive_dist, dist_init = distances_gen(agents_weights)
