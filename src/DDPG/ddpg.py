@@ -108,7 +108,7 @@ class DDPG:
 
     def run(self):
 
-        EPISODES = 500
+        EPISODES = 2000
         TEST = 10
 
         agent = Agent(ENVIRONMENT)

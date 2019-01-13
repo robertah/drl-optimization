@@ -3,8 +3,8 @@ import numpy as np
 import math
 
 # Hyper Parameters
-LAYER1_SIZE = 64
-LAYER2_SIZE = 64
+LAYER1_SIZE = 128
+LAYER2_SIZE = 128
 LEARNING_RATE = 1e-4
 TAU = 0.001
 BATCH_SIZE = 64

@@ -2,8 +2,8 @@ import tensorflow as tf
 import numpy as np
 import math
 
-LAYER1_SIZE = 64
-LAYER2_SIZE = 64
+LAYER1_SIZE = 128
+LAYER2_SIZE = 128
 LEARNING_RATE = 1e-3
 TAU = 0.001
 L2 = 0.01
