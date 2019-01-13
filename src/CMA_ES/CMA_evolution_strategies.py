@@ -6,8 +6,8 @@ from optimizers import EvolutionaryOptimizers
 
 class CMAEvolutionStrategies(EvolutionaryOptimizers):
 
-    def __init__(self, perc_selelcted):
-        self.perc_selected = perc_selelcted
+    def __init__(self, perc_selected):
+        self.perc_selected = perc_selected
         super(CMAEvolutionStrategies, self).__init__()
 
     def selection(self, scores, population_size):

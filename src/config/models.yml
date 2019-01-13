@@ -7,14 +7,20 @@ environments:
       - 'relu'
     max_time: 2000
     policy: 'argmax'
+    solved:
+      defined: True
+      average_score: 195
+      consecutive_trials: 100
 
   - name: 'Acrobot-v1'
     n_hidden_units:
       - 24
     activations:
       - 'relu'
-    max_time: 10000
+    max_time: 2000
     policy: 'argmax'
+    solved:
+      defined: False
 
   - name: 'Pendulum-v0'
     n_hidden_units:
@@ -23,23 +29,31 @@ environments:
       - 'relu'
     max_time: 2000
     policy: 'normal'
+    solved:
+      defined: False
 
   - name: 'BipedalWalker-v2'
     n_hidden_units:
-      - 128
-      - 128
+      - 64
+      - 64
     activations:
       - 'tanh'
       - 'tanh'
-    max_time: 10000
+    max_time: 2000
     policy: 'normal'
+    solved:
+      defined: True
+      average_score: 300
+      consecutive_trials: 100
 
   - name: 'Walker2d-v2'
     n_hidden_units:  # https://arxiv.org/pdf/1710.06117.pdf
-      - 50
-      - 50
+      - 48
+      - 48
     activations:
       - 'relu'
       - 'relu'
-    max_time: 10000
+    max_time: 2000
     policy: 'normal'
+    solved:
+      defined: False

@@ -25,4 +25,11 @@ class EnvironmentConfig:
                 self.hidden_units = e['n_hidden_units']
                 self.activations = e['activations']
                 self.max_time = e['max_time']
+                self.env._max_episode_steps = self.max_time
                 self.policy = e['policy']
+                solved = e['solved']
+                self.solving = solved['defined']
+                if self.solving:
+                    self.solving_avg_score = solved['average_score']
+                    self.solving_n_trials = solved['consecutive_trials']
+

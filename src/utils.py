@@ -20,6 +20,7 @@ def save_results(weights, scores, timestamp=datetime.now().strftime('%Y%m%d%H%M%
     assert len(weights) == len(scores)
     np.save(RESULTS_SCORES + '/{}-{}'.format(ENVIRONMENT.name, timestamp), scores)
     np.save(RESULTS_WEIGHTS + '/{}-{}'.format(ENVIRONMENT.name, timestamp), weights)
+    print("Results saved.")
 
 
 def get_results(timestamp=None):
@@ -72,7 +73,6 @@ def get_best_agent(mean=True, timestamp=None):
     weights, scores = get_results(timestamp)
     if mean:
         last_scores = scores[-1]
-        print(last_scores)
         best_scores = np.argsort(-last_scores)[:int(0.5 * len(last_scores))]
         best_weights = weights[-1][best_scores]
         weights_final = np.empty(best_weights[0].shape, dtype=np.ndarray)

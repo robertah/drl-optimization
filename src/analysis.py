@@ -1,5 +1,6 @@
 import numpy as np
-from genetic import Agent
+from population import Agent
+from config import ENVIRONMENT
 
 
 def perturbate_weights(weights, n=5, noise_scale=1, render=False):
@@ -17,6 +18,6 @@ def perturbate_weights(weights, n=5, noise_scale=1, render=False):
     """
     for i in range(n):
         noise = np.random.normal(scale=noise_scale)
-        agent = Agent(weights=weights + noise)
+        agent = Agent(environment_config=ENVIRONMENT, weights=weights + noise)
         score = agent.run_agent(render=render)
         print("{} - score: {}".format(i, score))

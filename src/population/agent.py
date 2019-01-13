@@ -1,6 +1,9 @@
 import numpy as np
 from keras.layers import Dense
 from keras.models import Sequential
+from keras.initializers import RandomNormal, RandomUniform
+
+WEIGHT_INITIALIZER = RandomUniform(-1, 1)
 
 
 class Agent:
@@ -35,7 +38,7 @@ class Agent:
             units=self.env.hidden_units[0],
             input_dim=self.env.state_size,
             activation=self.env.activations[0],
-            kernel_initializer='he_uniform'
+            kernel_initializer=WEIGHT_INITIALIZER
         )
         )
         if len(self.env.hidden_units) > 1:
@@ -43,11 +46,11 @@ class Agent:
                 model.add(Dense(
                     units=self.env.hidden_units[i],
                     activation=self.env.activations[i],
-                    kernel_initializer='he_uniform'
+                    kernel_initializer=WEIGHT_INITIALIZER
                 )
                 )
 
-        model.add(Dense(self.env.action_size, activation='softmax', kernel_initializer='he_uniform'))
+        model.add(Dense(self.env.action_size, activation='softmax', kernel_initializer=WEIGHT_INITIALIZER))
         # model.summary()
         return model
 
@@ -66,7 +69,6 @@ class Agent:
         if render is None:
             render = self.env.animate
         scores = []
-
         for i in range(self.env.n_runs):
             done = False
             score = 0
@@ -82,8 +84,8 @@ class Agent:
                 next_state = np.reshape(next_state, [1, self.env.state_size])
                 score += reward
                 # The following if condition is usefull to kill the agent if it is stuck in a position
-                if np.array_equal(np.around(next_state, 3), np.around(state, 3)):
-                    return score
+                # if np.array_equal(np.around(next_state, 3), np.around(state, 3)):
+                #     return score
 
                 state = next_state
 
