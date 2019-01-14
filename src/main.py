@@ -4,7 +4,6 @@ import analysis
 from config import POPULATION, GA, ES, CMA_ES, ENVIRONMENT
 from genetic import GeneticAlgorithm
 from CMA_ES import CMAEvolutionStrategies
-from DDPG import DDPG
 from population import Agent, Population
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -33,9 +32,13 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # analysis.perturbate_weights(weights)
 
 
+#
+# agent = Agent(ENVIRONMENT)
+#
+# ddpg = DDPG(agent=agent)
+#
+# ddpg.run()
 
-agent = Agent(ENVIRONMENT)
+from DDPG import playGame
 
-ddpg = DDPG(agent=agent)
-
-ddpg.run()
+playGame()
