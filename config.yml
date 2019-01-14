@@ -56,4 +56,4 @@ visualization:
   path: 'visualization'
   weights: 'weights'
 
-logger: 'logs.log'
+logger: 'runs.yml'

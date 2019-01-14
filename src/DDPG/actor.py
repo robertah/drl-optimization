@@ -51,8 +51,8 @@ class ActorNetwork:
         W3 = tf.Variable(tf.random_uniform([layer2_size, action_dim], -3e-3, 3e-3))
         b3 = tf.Variable(tf.random_uniform([action_dim], -3e-3, 3e-3))
 
-        layer1 = tf.nn.relu(tf.matmul(state_input, W1) + b1)
-        layer2 = tf.nn.relu(tf.matmul(layer1, W2) + b2)
+        layer1 = tf.nn.tanh(tf.matmul(state_input, W1) + b1)
+        layer2 = tf.nn.tanh(tf.matmul(layer1, W2) + b2)
         action_output = tf.tanh(tf.matmul(layer2, W3) + b3)
 
         return state_input, action_output, [W1, b1, W2, b2, W3, b3]
@@ -63,8 +63,8 @@ class ActorNetwork:
         target_update = ema.apply(net)
         target_net = [ema.average(x) for x in net]
 
-        layer1 = tf.nn.relu(tf.matmul(state_input, target_net[0]) + target_net[1])
-        layer2 = tf.nn.relu(tf.matmul(layer1, target_net[2]) + target_net[3])
+        layer1 = tf.nn.tanh(tf.matmul(state_input, target_net[0]) + target_net[1])
+        layer2 = tf.nn.tanh(tf.matmul(layer1, target_net[2]) + target_net[3])
         action_output = tf.tanh(tf.matmul(layer2, target_net[4]) + target_net[5])
 
         return state_input, action_output, target_update, target_net

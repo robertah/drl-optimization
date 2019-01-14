@@ -1,7 +1,10 @@
-import os
 import glob
-import numpy as np
+import logging
+import os
 from datetime import datetime
+
+import numpy as np
+
 from config import ENVIRONMENT, RESULTS_SCORES, RESULTS_WEIGHTS
 
 

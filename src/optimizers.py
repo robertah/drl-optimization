@@ -1,8 +1,10 @@
+import sys
 from abc import ABC, abstractmethod
 from datetime import datetime
-import sys
+
 import numpy as np
 
+from config import LOGGER, ENVIRONMENT
 from utils import print_scores, save_results
 
 
@@ -85,7 +87,13 @@ class EvolutionaryOptimizers(ABC):
                         agents[k].model.set_weights(population.agents_weights[i + 1][k])
 
                 except KeyboardInterrupt:
-                    save_results(population.agents_weights[:i], population.scores[:i], timestamp)
+                    LOGGER.log(environment=ENVIRONMENT.name,
+                               timestamp=timestamp,
+                               algorithm=self.__class__.__name__,
+                               parameters=vars(self),
+                               generations=i,
+                               score=np.max(population.scores[i-1]))
+                    save_results(population.agents_weights[:i-1], population.scores[:i-1], timestamp)
                     sys.exit()
 
             else:
@@ -94,6 +102,12 @@ class EvolutionaryOptimizers(ABC):
                 break
 
         if save:
+            LOGGER.log(environment=ENVIRONMENT.name,
+                       timestamp=timestamp,
+                       algorithm=self.__class__.__name__,
+                       parameters=vars(self),
+                       generations=i,
+                       score=np.max(population.scores[i]))
             save_results(population.agents_weights, population.scores, timestamp)
 
         return population.agents_weights, population.scores

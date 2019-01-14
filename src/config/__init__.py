@@ -3,6 +3,7 @@ import yaml
 from .environment_config import EnvironmentConfig
 from .population_config import PopulationConfig
 from .optimizers_config import *
+from .logger_config import Logger
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', '..'))
 
@@ -37,4 +38,4 @@ RESULTS_WEIGHTS = os.path.join(ROOT_DIR, config['results']['path'], config['resu
 
 VISUALIZATION_WEIGHTS = os.path.join(ROOT_DIR, config['visualization']['path'], config['visualization']['weights'])
 
-LOGGER = config['logger']
+LOGGER = Logger(os.path.join(ROOT_DIR, config['logger']))

@@ -7,12 +7,17 @@ import gym
 import tensorflow as tf
 import numpy as np
 from .noise import OrnsteinUhlenbeckNoise
-from .critic import CriticNetwork
+from .critic import CriticNetwork, TAU
 from .actor import ActorNetwork
 from .replay_buffer import ReplayBuffer
 
-from config import ENVIRONMENT
+from config import ENVIRONMENT, LOGGER
 from .agent import Agent
+
+import sys
+from datetime import datetime
+import logging
+import inspect
 
 # Hyper Parameters:
 
@@ -20,6 +25,9 @@ REPLAY_BUFFER_SIZE = 1000000
 REPLAY_START_SIZE = 10000
 BATCH_SIZE = 64
 GAMMA = 0.99
+
+EPISODES = 10000
+TEST = 10
 
 
 class DDPG:
@@ -108,39 +116,65 @@ class DDPG:
 
     def run(self):
 
-        EPISODES = 2000
-        TEST = 10
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
 
         agent = Agent(ENVIRONMENT)
 
         for episode in range(EPISODES):
-            state = self.environment.env.reset()
-            # print "episode:",episode
-            # Train
-            for step in range(agent.env.max_time):
-                action = self.noise_action(state)
-                next_state, reward, done, _ = agent.env.env.step(action)
-                self.perceive(state, action, reward, next_state, done)
-                state = next_state
-                if done:
-                    break
-            # Testing:
-            if episode % 100 == 0 and episode > 100:
-                total_reward = 0
-                for i in range(TEST):
-                    state = agent.env.env.reset()
-                    for j in range(agent.env.max_time):
-                        # env.render()
-                        action = self.action(state)  # direct action for test
-                        state, reward, done, _ = agent.env.env.step(action)
-                        total_reward += reward
-                        if done:
-                            break
-                ave_reward = total_reward / TEST
-                print('episode: ', episode, 'Evaluation Average Reward:', ave_reward)
+            try:
+                state = self.environment.env.reset()
+                # print "episode:",episode
+                # Train
+                print(episode)
+                for step in range(agent.env.max_time):
+                    action = self.noise_action(state)
+                    next_state, reward, done, _ = agent.env.env.step(action)
+                    self.perceive(state, action, reward, next_state, done)
+                    state = next_state
+                    if done:
+                        break
+                # Testing:
+                if episode % 100 == 0 and episode >= 100:
+                    total_reward = 0
+                    for i in range(TEST):
+                        state = agent.env.env.reset()
+                        for j in range(agent.env.max_time):
+                            # env.render()
+                            action = self.action(state)  # direct action for test
+                            state, reward, done, _ = agent.env.env.step(action)
+                            total_reward += reward
+                            if done:
+                                break
+                    ave_reward = total_reward / TEST
+                    print('episode: ', episode, 'Evaluation Average Reward:', ave_reward)
+            except KeyboardInterrupt:
+                if episode >= 100:
+                    LOGGER.log(
+                        environment=ENVIRONMENT.name,
+                        timestamp=timestamp,
+                        algorithm=self.__class__.__name__,
+                        parameters=self.get_parameters(),
+                        episodes=episode,
+                        score=ave_reward
+                    )
+                sys.exit()
 
-
-
-
+    def get_parameters(self):
+        params = {
+            'gamma': GAMMA,
+            'tau': TAU,
+            'batch_size': BATCH_SIZE,
+            'replay_buffer_size': REPLAY_BUFFER_SIZE,
+            'replay_start_size': REPLAY_START_SIZE,
+            'actor': {
+                'hidden_sizes': [128, 128],
+                'learning_rate': 0.0001
+            },
+            'critic': {
+                'hidden_sizes': [128, 128],
+                'learning_rate': 0.0001
+            }
+        }
+        return params
 
 
