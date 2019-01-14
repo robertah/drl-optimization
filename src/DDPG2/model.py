@@ -6,22 +6,18 @@ from keras.losses import mean_squared_error
 
 GAMMA = 0.99
 
+
 class Actor(Sequential):
 
     def __init__(self, state_size, action_size, learning_rate):
         super(Actor, self).__init__()
-        self.build_model(state_size, action_size, learning_rate)
-
-    def build_model(self, state_size, action_size, learning_rate):
         self.add(Dense(input_dim=state_size, units=256, activation='relu'))
         self.add(Dense(units=128, activation='relu'))
         self.add(Dense(units=64, activation='relu'))
         self.add(Dense(units=action_size, activation='tanh'))
 
-
     def optimize(self, critic, state):
         predicted_action = self.predict(state)
-        # loss_actor = -1 * torch.sum(self.critic.forward(s1, pred_a1))
         loss = -1 * np.sum(critic.predict([state, predicted_action]))
 
         """
@@ -46,20 +42,14 @@ class Critic(Model):
 
         super(Critic, self).__init__(input=[S, A], output=value)
         # model = Model(input=[S, A], output=value)
-        adam = Adam(lr=learning_rate)
-        self.compile(loss='mse', optimizer=adam)
+        # adam = Adam(lr=learning_rate)
+        # self.compile(loss='mse', optimizer=adam)
 
     def optimize(self, target_actor, target_critic, s1, a1, r1, s2):
-        # a2 = self.target_actor.forward(s2).detach()
         a2 = target_actor.predict(s2)
-
-        # next_val = torch.squeeze(self.target_critic.forward(s2, a2).detach())
         next_val = target_critic.predict([s2, a2])
 
-        # y_exp = r + gamma*Q'( s2, pi'(s2))
         y_expected = r1 + GAMMA * next_val
-        # y_pred = Q( s1, a1)
-        # y_predicted = torch.squeeze(self.critic.forward(s1, a1))
         y_predicted = self.predict([s1, a1])
 
         loss = mean_squared_error(y_predicted, y_expected)
@@ -68,14 +58,18 @@ class Critic(Model):
         """
 
 
-
 def update_target(target, model, tau):
     """
-    y = TAU*x + (1 - TAU)*y
-    :param target:
-    :param model:
-    :param tau:
-    :return:
+    Update target networks:
+        target = tau * model + (1 - tau) * target
+
+    :param target: target network (i.e. target_actor or target_critic
+    :type target: keras.Model
+    :param model: model network (i.e. actor or critic)
+    :type model: keras.Model
+    :param tau: target update coefficient (tau << 1)
+    :type tau: float
+    :return: updated target network
     """
     model_weights = model.layers.get_weights()
     target_weights = target.layers.get_weights()
