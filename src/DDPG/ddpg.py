@@ -92,7 +92,7 @@ def playGame(train_indicator=1):  # 1 means Train, 0 means simply Run
             total_reward += reward
             state = new_state
 
-            # print("Episode", i, "Step", step, "Action", action, "Reward", reward, "Loss", loss)
+            print("Episode", i, "Step", step, "Action", action, "Reward", reward, "Loss", loss)
 
             step += 1
             if done:
