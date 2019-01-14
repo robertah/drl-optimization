@@ -29,7 +29,7 @@ class DDPG:
 
         # initialize actor and critic networks
         self.actor = Actor(self.environment.state_size, self.environment.action_size, LEARNING_RATE)
-        self.critic = Critic(self.agent.env.state_size, self.environment.action_size, LEARNING_RATE)
+        self.critic = Critic(self.environment.state_size, self.environment.action_size, LEARNING_RATE)
 
         # initialize target networks
         self.target_actor = copy(self.actor)
