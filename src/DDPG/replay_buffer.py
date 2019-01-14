@@ -1,5 +1,7 @@
-from collections import deque
 import random
+from collections import deque
+
+import numpy as np
 
 
 class ReplayBuffer:
@@ -11,9 +13,11 @@ class ReplayBuffer:
 
     def get_batch(self, batch_size):
         if self.n_experiences < batch_size:
-            return random.sample(self.buffer, self.n_experiences)
+            batch = random.sample(self.buffer, self.n_experiences)
         else:
-            return random.sample(self.buffer, batch_size)
+            batch = random.sample(self.buffer, batch_size)
+        return np.asarray([e[0] for e in batch]), np.asarray([e[1] for e in batch]), np.asarray(
+            [e[2] for e in batch]), np.asarray([e[3] for e in batch]), np.asarray([e[4] for e in batch])
 
     def add(self, state, action, reward, new_state, done):
         experience = (state, action, reward, new_state, done)

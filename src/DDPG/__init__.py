@@ -1,2 +1,1 @@
-from .ddpg import DDPG
-from .agent import Agent
+from .ddpg import playGame

@@ -1,177 +1,102 @@
-# -----------------------------------
-# Deep Deterministic Policy Gradient
-# Author: Flood Sung
-# Date: 2016.5.4
-# -----------------------------------
-import gym
-import tensorflow as tf
 import numpy as np
-from .noise import OrnsteinUhlenbeckNoise
-from .critic import CriticNetwork, TAU
-from .actor import ActorNetwork
+import tensorflow as tf
+import json
+
 from .replay_buffer import ReplayBuffer
+from .actor import ActorNetwork
+from .critic import CriticNetwork
+from .noise import OrnsteinUhlenbeckNoise
 
-from config import ENVIRONMENT, LOGGER
-from .agent import Agent
-
-import sys
-from datetime import datetime
-import logging
-import inspect
-
-# Hyper Parameters:
-
-REPLAY_BUFFER_SIZE = 1000000
-REPLAY_START_SIZE = 10000
-BATCH_SIZE = 64
-GAMMA = 0.99
-
-EPISODES = 5000
-TEST = 10
+from config import ENVIRONMENT
 
 
-class DDPG:
-    """docstring for DDPG"""
-
-    def __init__(self, agent):
-        self.agent = agent
-        self.environment = agent.env
-        # Randomly initialize actor network and critic network
-        # with both their target networks
-        self.state_dim = self.environment.state_size
-        self.action_dim = self.environment.action_size
-
-        self.sess = tf.InteractiveSession()
-
-        self.actor_network = ActorNetwork(self.sess, self.state_dim, self.action_dim)
-        self.critic_network = CriticNetwork(self.sess, self.state_dim, self.action_dim)
-
-        # initialize replay buffer
-        self.replay_buffer = ReplayBuffer(REPLAY_BUFFER_SIZE)
-
-        # Initialize a random process the Ornstein-Uhlenbeck process for action exploration
-        self.exploration_noise = OrnsteinUhlenbeckNoise(self.action_dim)
-
-    def train(self):
-        # print "train step",self.time_step
-        # Sample a random minibatch of N transitions from replay buffer
-        minibatch = self.replay_buffer.get_batch(BATCH_SIZE)
-        state_batch = np.asarray([data[0] for data in minibatch])
-        action_batch = np.asarray([data[1] for data in minibatch])
-        reward_batch = np.asarray([data[2] for data in minibatch])
-        next_state_batch = np.asarray([data[3] for data in minibatch])
-        done_batch = np.asarray([data[4] for data in minibatch])
-
-        # for action_dim = 1
-        action_batch = np.resize(action_batch, [BATCH_SIZE, self.action_dim])
-
-        # Calculate y_batch
-
-        next_action_batch = self.actor_network.target_actions(next_state_batch)
-        q_value_batch = self.critic_network.target_q(next_state_batch, next_action_batch)
-        y_batch = []
-        for i in range(len(minibatch)):
-            if done_batch[i]:
-                y_batch.append(reward_batch[i])
-            else:
-                y_batch.append(reward_batch[i] + GAMMA * q_value_batch[i])
-        y_batch = np.resize(y_batch, [BATCH_SIZE, 1])
-        # Update critic by minimizing the loss L
-        self.critic_network.train(y_batch, state_batch, action_batch)
-
-        # Update the actor policy using the sampled gradient:
-        action_batch_for_gradients = self.actor_network.actions(state_batch)
-        q_gradient_batch = self.critic_network.gradients(state_batch, action_batch_for_gradients)
-
-        self.actor_network.train(q_gradient_batch, state_batch)
-
-        # Update the target networks
-        self.actor_network.update_target()
-        self.critic_network.update_target()
-
-    def noise_action(self, state):
-        # Select action a_t according to the current policy and exploration noise
-        action = self.actor_network.action(state)
-        return action + self.exploration_noise.noise()
-
-    def action(self, state):
-        action = self.actor_network.action(state)
-        return action
-
-    def perceive(self, state, action, reward, next_state, done):
-        # Store transition (s_t,a_t,r_t,s_{t+1}) in replay buffer
-        self.replay_buffer.add(state, action, reward, next_state, done)
-
-        # Store transitions to replay start size then start training
-        if self.replay_buffer.n_experiences > REPLAY_START_SIZE:
-            self.train()
-
-        # if self.time_step % 10000 == 0:
-        # self.actor_network.save_network(self.time_step)
-        # self.critic_network.save_network(self.time_step)
-
-        # Re-iniitialize the random process when an episode ends
-        if done:
-            self.exploration_noise.reset()
-
-    def run(self):
-
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-
-        agent = Agent(ENVIRONMENT)
-
-        for episode in range(EPISODES):
-            try:
-                state = self.environment.env.reset()
-                for step in range(agent.env.max_time):
-                    action = self.noise_action(state)
-                    next_state, reward, done, _ = agent.env.env.step(action)
-                    self.perceive(state, action, reward, next_state, done)
-                    state = next_state
-                    if done:
-                        break
-                # Testing:
-                if episode % 100 == 0 and episode >= 100:
-                    total_reward = 0
-                    for i in range(TEST):
-                        state = agent.env.env.reset()
-                        for j in range(agent.env.max_time):
-                            # env.render()
-                            action = self.action(state)  # direct action for test
-                            state, reward, done, _ = agent.env.env.step(action)
-                            total_reward += reward
-                            if done:
-                                break
-                    ave_reward = total_reward / TEST
-                    print('episode: ', episode, 'Evaluation Average Reward:', ave_reward)
-            except KeyboardInterrupt:
-                if episode >= 100:
-                    LOGGER.log(
-                        environment=ENVIRONMENT.name,
-                        timestamp=timestamp,
-                        algorithm=self.__class__.__name__,
-                        parameters=self.get_parameters(),
-                        episodes=episode,
-                        score=ave_reward
-                    )
-                sys.exit()
-
-    def get_parameters(self):
-        params = {
-            'gamma': GAMMA,
-            'tau': TAU,
-            'batch_size': BATCH_SIZE,
-            'replay_buffer_size': REPLAY_BUFFER_SIZE,
-            'replay_start_size': REPLAY_START_SIZE,
-            'actor': {
-                'hidden_sizes': [128, 128],
-                'learning_rate': 0.0001
-            },
-            'critic': {
-                'hidden_sizes': [128, 128],
-                'learning_rate': 0.0001
-            }
-        }
-        return params
+def get_noisy_action(action, noise):
+    return action + noise.noise()
 
 
+def playGame(train_indicator=1):  # 1 means Train, 0 means simply Run
+    BUFFER_SIZE = 100000
+    BATCH_SIZE = 32
+    GAMMA = 0.99
+    TAU = 0.001  # Target Network HyperParameters
+    LRA = 0.0001  # Learning rate for Actor
+    LRC = 0.001  # Lerning rate for Critic
+
+    action_size = ENVIRONMENT.action_size  # Steering/Acceleration/Brake
+    state_size = ENVIRONMENT.state_size  # of sensors input
+
+    np.random.seed(1337)
+
+    vision = False
+
+    EXPLORE = 100000.
+    episode_count = 2000
+    max_steps = 100000
+    reward = 0
+    done = False
+    step = 0
+    epsilon = 1
+    indicator = 0
+
+    noise = OrnsteinUhlenbeckNoise(action_size)
+
+    # Tensorflow GPU optimization
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    sess = tf.Session(config=config)
+    from keras import backend as K
+    K.set_session(sess)
+
+    actor = ActorNetwork(sess, state_size, action_size, BATCH_SIZE, TAU, LRA)
+    critic = CriticNetwork(sess, state_size, action_size, BATCH_SIZE, TAU, LRC)
+    buff = ReplayBuffer(BUFFER_SIZE)  # Create replay buffer
+
+    for i in range(episode_count):
+
+        print("Episode : " + str(i) + " Replay Buffer " + str(buff.n_experiences))
+        state = ENVIRONMENT.env.reset()
+
+        total_reward = 0
+
+        for j in range(max_steps):
+            loss = 0
+            epsilon -= 1.0 / EXPLORE
+
+            action = actor.model.predict(state.reshape(1, state.shape[0]))
+
+            action = get_noisy_action(action, noise)
+
+            new_state, reward, done, info = ENVIRONMENT.env.step(action[0])
+
+            buff.add(state, action[0], reward, new_state, done)
+
+            s, a, r, new_s, d = buff.get_batch(BATCH_SIZE)
+
+            y_t = r
+            target_q_values = critic.target_model.predict([s, actor.target_model.predict(new_s)])
+
+            for k in range(len(d)):
+                if d[k]:
+                    y_t[k] = r[k]
+                else:
+                    y_t[k] = r[k] + GAMMA * target_q_values[k]
+
+            if train_indicator:
+                loss += critic.model.train_on_batch([s, a], y_t)
+                a_for_grad = actor.model.predict(s)
+                grads = critic.gradients(s, a_for_grad)
+                actor.train(s, grads)
+                actor.target_train()
+                critic.target_train()
+
+            total_reward += reward
+            state = new_state
+
+            # print("Episode", i, "Step", step, "Action", action, "Reward", reward, "Loss", loss)
+
+            step += 1
+            if done:
+                break
+
+        print("TOTAL REWARD @ " + str(i) + "-th Episode  : Reward " + str(total_reward))
+        print("Total Step: " + str(step))
