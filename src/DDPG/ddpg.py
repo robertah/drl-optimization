@@ -15,11 +15,11 @@ def get_noisy_action(action, noise):
 
 
 def playGame(train_indicator=1):  # 1 means Train, 0 means simply Run
-    BUFFER_SIZE = 100000
-    BATCH_SIZE = 32
+    BUFFER_SIZE = 1000000
+    BATCH_SIZE = 128
     GAMMA = 0.99
     TAU = 0.001  # Target Network HyperParameters
-    LRA = 0.0001  # Learning rate for Actor
+    LRA = 0.001  # Learning rate for Actor
     LRC = 0.001  # Lerning rate for Critic
 
     action_size = ENVIRONMENT.action_size  # Steering/Acceleration/Brake
@@ -29,13 +29,13 @@ def playGame(train_indicator=1):  # 1 means Train, 0 means simply Run
 
     vision = False
 
-    EXPLORE = 100000.
-    episode_count = 2000
-    max_steps = 100000
+    # EXPLORE = 100000.
+    episode_count = 5000
+    max_steps = 1000
     reward = 0
     done = False
     step = 0
-    epsilon = 1
+    # epsilon = 1
     indicator = 0
 
     noise = OrnsteinUhlenbeckNoise(action_size)
@@ -60,7 +60,7 @@ def playGame(train_indicator=1):  # 1 means Train, 0 means simply Run
 
         for j in range(max_steps):
             loss = 0
-            epsilon -= 1.0 / EXPLORE
+            # epsilon -= 1.0 / EXPLORE
 
             action = actor.model.predict(state.reshape(1, state.shape[0]))
 
@@ -92,7 +92,7 @@ def playGame(train_indicator=1):  # 1 means Train, 0 means simply Run
             total_reward += reward
             state = new_state
 
-            print("Episode", i, "Step", step, "Action", action, "Reward", reward, "Loss", loss)
+            # print("Episode", i, "Step", step, "Action", action, "Reward", reward, "Loss", loss)
 
             step += 1
             if done:

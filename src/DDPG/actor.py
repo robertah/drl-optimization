@@ -2,6 +2,10 @@ import keras.backend as K
 import tensorflow as tf
 from keras.layers import Dense, Input
 from keras.models import Model
+from keras.initializers import RandomUniform, VarianceScaling
+
+var_scaling = VarianceScaling()
+init = RandomUniform(-0.003, 0.003)
 
 
 class ActorNetwork(object):
@@ -41,10 +45,10 @@ class ActorNetwork(object):
     @staticmethod
     def create_actor_network(state_size, action_dim):
         state = Input(shape=[state_size])
-        h0 = Dense(256, activation='tanh')(state)
-        h1 = Dense(128, activation='tanh')(h0)
-        h2 = Dense(64, activation='tanh')(h1)
-        action = Dense(action_dim, activation='tanh')(h2)
+        h0 = Dense(256, activation='tanh', kernel_initializer=var_scaling)(state)
+        h1 = Dense(128, activation='tanh', kernel_initializer=var_scaling)(h0)
+        h2 = Dense(64, activation='tanh', kernel_initializer=var_scaling)(h1)
+        action = Dense(action_dim, activation='tanh', kernel_initializer=init)(h2)
 
         model = Model(input=state, output=action)
         return model, model.trainable_weights, state
