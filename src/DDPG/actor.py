@@ -43,7 +43,7 @@ class ActorNetwork(object):
         state = Input(shape=[state_size])
         h0 = Dense(256, activation='tanh')(state)
         h1 = Dense(128, activation='tanh')(h0)
-        h2 = Dense(64, activation='tahn')(h1)
+        h2 = Dense(64, activation='tanh')(h1)
         action = Dense(action_dim, activation='tanh')(h2)
 
         model = Model(input=state, output=action)
