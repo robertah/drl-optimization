@@ -7,7 +7,6 @@ class Logger:
         self.filename = filename
 
     def log(self, environment, timestamp, algorithm, parameters, generations=None, episodes=None, score=None):
-        print(generations, episodes)
         if generations:
             run = {'run':
                        {'environment': environment,
