@@ -26,7 +26,7 @@ REPLAY_START_SIZE = 10000
 BATCH_SIZE = 64
 GAMMA = 0.99
 
-EPISODES = 10000
+EPISODES = 5000
 TEST = 10
 
 
@@ -123,9 +123,6 @@ class DDPG:
         for episode in range(EPISODES):
             try:
                 state = self.environment.env.reset()
-                # print "episode:",episode
-                # Train
-                print(episode)
                 for step in range(agent.env.max_time):
                     action = self.noise_action(state)
                     next_state, reward, done, _ = agent.env.env.step(action)
