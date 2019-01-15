@@ -12,11 +12,11 @@
 ### Requirements
 Create a virtual environment and install all required packages:
 
-`conda create --name deep-learning`
+`conda create --name deep-learning python=3.6`
 
 `source activate deep-learning`
 
-`pip install -r requirements`
+`pip install -r requirements.txt`
 
 ### Configuration file
 In `config.yml`, one can choose which OpenAI Gym environment to use (all available environments are listed on top).
@@ -38,20 +38,20 @@ The analysis of the different DRL optimization algorithms can be found in `noteb
 .
 ├── config.yml         # configuration file
 ├── src
-|   ├── config         # configuration loading package
-|   ├── A2C            # A2C package
-|   ├── DDPG           # Deep Deterministic Policy Gradients package
-|   ├── GA             # Genetic Algorithm package
-|   ├── CMA_ES         # Covariance Matrix Adapatation ES package
-|   └── population     # population package for evolutionary algorithms
+│   ├── config         # configuration loading package
+│   ├── A2C            # A2C package
+│   ├── DDPG           # Deep Deterministic Policy Gradients package
+│   ├── GA             # Genetic Algorithm package
+│   ├── CMA_ES         # Covariance Matrix Adapatation ES package
+│   └── population     # population package for evolutionary algorithms
 ├── main.py            # main 
 ├── optimizers.py      # base gradient-free optimizer
 ├── visualization.py   # visualization for analysis 
 ├── utils.py           # helper functions
 ├── notebooks          # notebooks with results analysis
 ├── results            # folder containing results after training
-|   ├── scores
-|   └── weights
+│   ├── scores
+│   └── weights
 ├── runs.yml           # runs log file
 └── requirements.txt   # list of all packages used
 
