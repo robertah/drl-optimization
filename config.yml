@@ -1,4 +1,4 @@
-random_seed: 42
+random_seed:
 
 # POSSIBLE ENVIRONMENTS:
 # - CartPole-v1
@@ -18,7 +18,7 @@ ddpg:
   n_episodes: 5000
   buffer_size: 1000000
   batch_size: 128
-  gamma: 0.995
+  gamma: 0.99
   tau: 0.01
   actor_lr: 0.0001
   critic_lr: 0.001

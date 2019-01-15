@@ -17,7 +17,7 @@ class Actor:
         self.sess = sess
         self.batch_size = batch_size
         self.tau = tau
-        self.learning_rate = learning_rate
+        self.lr = learning_rate
 
         K.set_session(sess)
 
@@ -32,14 +32,14 @@ class Actor:
         self.sess.run(tf.global_variables_initializer())
         # self.model.summary()
 
-    @staticmethod
-    def build_model(state_size, action_dim, hidden_units, activations):
+    def build_model(self, state_size, action_dim, hidden_units, activations):
         state = Input(shape=[state_size])
 
-        h0 = Dense(hidden_units[0], activation=activations[0], kernel_initializer=var_scaling)(state)
-        h1 = Dense(hidden_units[1], activation=activations[1], kernel_initializer=var_scaling)(h0)
+        h0 = Dense(256, activation='relu', kernel_initializer=var_scaling)(state)
+        h1 = Dense(128, activation='relu', kernel_initializer=var_scaling)(h0)
+        h2 = Dense(64, activation='relu', kernel_initializer=var_scaling)(h1)
 
-        action = Dense(action_dim, activation='tanh', kernel_initializer=init)(h1)
+        action = Dense(action_dim, activation='tanh', kernel_initializer=init)(h2)
 
         model = Model(inputs=state, outputs=action)
         return model, model.trainable_weights, state
@@ -77,14 +77,15 @@ class Critic:
 
     def build_model(self, state_size, action_size):
         state = Input(shape=[state_size])
-        h1 = Dense(128, activation='relu', kernel_initializer=var_scaling)(state)
+        w1 = Dense(256, activation='relu', kernel_initializer=var_scaling)(state)
+        h1 = Dense(128, activation='relu')(w1)
 
         action = Input(shape=[action_size])
-        a1 = Dense(128, activation='linear', kernel_initializer=var_scaling)(action)
+        a1 = Dense(128, activation='relu', kernel_initializer=var_scaling)(action)
 
         h2 = concatenate([h1, a1])
 
-        h3 = Dense(128, activation='relu', kernel_initializer=var_scaling, activity_regularizer=l2(0.01))(h2)
+        h3 = Dense(128, activation='relu', kernel_initializer=var_scaling)(h2)
         value = Dense(1, activation='linear', kernel_initializer=init)(h3)
 
         model = Model(inputs=[state, action], outputs=value)

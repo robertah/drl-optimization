@@ -7,15 +7,13 @@ import numpy as np
 class ReplayBuffer:
 
     def __init__(self, buffer_size):
+        self.buffer = deque()
         self.buffer_size = buffer_size
         self.n_experiences = 0
-        self.buffer = deque()
 
     def get_batch(self, batch_size):
-        if self.n_experiences < batch_size:
-            batch = random.sample(self.buffer, self.n_experiences)
-        else:
-            batch = random.sample(self.buffer, batch_size)
+        size = min(batch_size, self.n_experiences)
+        batch = random.sample(self.buffer, size)
         return np.asarray([e[0] for e in batch]), np.asarray([e[1] for e in batch]), np.asarray(
             [e[2] for e in batch]), np.asarray([e[3] for e in batch]), np.asarray([e[4] for e in batch])
 
@@ -27,7 +25,3 @@ class ReplayBuffer:
         else:
             self.buffer.popleft()
             self.buffer.append(experience)
-
-    def clear(self):
-        self.buffer = deque()
-        self.n_experiences = 0

@@ -24,7 +24,7 @@ class DDPG:
         self.critic_lr = ddpg_config.critic_lr
 
         config = tf.ConfigProto()
-        config.gpu_options.allow_growth = True
+        # config.gpu_options.allow_growth = True
         sess = tf.Session(config=config)
 
         K.set_session(sess)
@@ -36,7 +36,7 @@ class DDPG:
                              self.tau, self.critic_lr)
 
         self.buffer = ReplayBuffer(ddpg_config.buffer_size)
-        self.noise = OrnsteinUhlenbeckNoise(self.environment.action_size)
+        self.noise = OrnsteinUhlenbeckNoise(self.environment.env.action_space)
 
         # models' weights path
         self.actor_weights = ddpg_config.actor_weights
@@ -67,19 +67,18 @@ class DDPG:
 
             for i in range(self.n_episodes):
 
-                # print("Episode: {} - Replay Buffer size: {}".format(i, buff.n_experiences))
-
                 # get initial state
                 state = self.environment.env.reset()
 
                 total_reward = 0
 
                 for j in range(self.environment.max_time):
-                    loss = 0
+                    # loss = 0
+
+                    self.environment.env.render()
 
                     action = self.actor.model.predict(state.reshape(1, state.shape[0]))
-
-                    action = self.noise.get_noisy_action(action)
+                    action = self.noise.get_noisy_action(action, j)
 
                     new_state, reward, done, info = self.environment.env.step(action[0])
 
@@ -91,13 +90,15 @@ class DDPG:
 
                     y = r
                     for k in range(len(d)):
-                        if d[k]:
-                            y[k] = r[k]
-                        else:
-                            y[k] = r[k] + self.gamma * target_q[k]
+                        # if d[k]:
+                        #     y[k] = r[k]
+                        # else:
+                        #     y[k] = r[k] + self.gamma * target_q[k]
+                        y[k] = r[k] + self.gamma * target_q[k]
 
                     if train:
-                        loss += self.critic.model.train_on_batch([s, a], y)
+                        # loss += self.critic.model.train_on_batch([s, a], y)
+                        self.critic.model.train_on_batch([s, a], y)
                         a_grads = self.actor.model.predict(s)
                         grads = self.critic.gradients(s, a_grads)
                         self.actor.train(s, grads)
@@ -130,8 +131,8 @@ class DDPG:
                       " Replay Buffer size: {}".format(i, total_reward, step, self.buffer.n_experiences))
 
         except KeyboardInterrupt:
-            print("Saving weights...")
             if i >= 100:
+                print("Saving weights...")
                 LOGGER.log(environment=self.environment.name,
                            timestamp=timestamp,
                            algorithm=self.__class__.__name__,
