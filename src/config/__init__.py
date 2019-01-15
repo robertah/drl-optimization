@@ -17,13 +17,16 @@ RANDOM_SEED = config['random_seed']
 ENVIRONMENT = EnvironmentConfig(config, models, RANDOM_SEED)
 
 
-# GRADIENT BASED ALGORITHMS CONFIG
-EPISODES = config['episodes']
+RESULTS_SCORES = os.path.join(ROOT_DIR, config['results']['path'], config['results']['scores'])
+RESULTS_WEIGHTS = os.path.join(ROOT_DIR, config['results']['path'], config['results']['weights'])
+RESULTS_SAVED_MODELS = os.path.join(ROOT_DIR, config['results']['path'], config['results']['saved_models'])
+
+VISUALIZATION_WEIGHTS = os.path.join(ROOT_DIR, config['visualization']['path'], config['visualization']['weights'])
+
+LOGGER = Logger(os.path.join(ROOT_DIR, config['logger']))
 
 # A2C = ActorCriticConfig(config)
-DDPG_Config = DDPGConfig(config)
-
-
+DDPG_Config = DDPGConfig(config, RESULTS_SAVED_MODELS)
 
 # EVOLUTIONARY ALGORITHMS
 
@@ -33,9 +36,3 @@ ES = EvolutionStrategiesConfig(config)
 CMA_ES = CMAEvolutionStrategiesConfig(config)
 
 
-RESULTS_SCORES = os.path.join(ROOT_DIR, config['results']['path'], config['results']['scores'])
-RESULTS_WEIGHTS = os.path.join(ROOT_DIR, config['results']['path'], config['results']['weights'])
-
-VISUALIZATION_WEIGHTS = os.path.join(ROOT_DIR, config['visualization']['path'], config['visualization']['weights'])
-
-LOGGER = Logger(os.path.join(ROOT_DIR, config['logger']))

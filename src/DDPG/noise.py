@@ -19,3 +19,6 @@ class OrnsteinUhlenbeckNoise:
         dx = self.theta * (self.mu - x) + self.sigma * np.random.randn(len(x))
         self.state = x + dx
         return self.state
+
+    def get_noisy_action(self, action):
+        return action + self.noise()

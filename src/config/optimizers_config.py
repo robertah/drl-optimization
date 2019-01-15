@@ -1,3 +1,6 @@
+import os
+
+
 class GeneticAlgorithmConfig:
     def __init__(self, config):
         ga = config['genetic_algorithm']
@@ -21,9 +24,8 @@ class EvolutionStrategiesConfig:
 
 
 class DDPGConfig:
-    def __init__(self, config):
+    def __init__(self, config, models_path):
         ddpg = config['ddpg']
-        self.replay_start = ddpg['replay_start']
         self.buffer_size = ddpg['buffer_size']
         self.batch_size = ddpg['batch_size']
         self.gamma = ddpg['gamma']
@@ -31,4 +33,8 @@ class DDPGConfig:
         self.actor_lr = ddpg['actor_lr']
         self.critic_lr = ddpg['critic_lr']
         self.n_episodes = ddpg['n_episodes']
-        self.n_runs = ddpg['n_runs']
+        self.actor_weights = os.path.join(models_path, ddpg['saved_weights']['actor'])
+        self.critic_weights = os.path.join(models_path, ddpg['saved_weights']['critic'])
+        self.target_actor_weights = os.path.join(models_path, ddpg['saved_weights']['target_actor'])
+        self.target_critic_weights = os.path.join(models_path, ddpg['saved_weights']['target_critic'])
+

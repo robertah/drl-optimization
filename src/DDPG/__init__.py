@@ -1,1 +1,1 @@
-from .ddpg import playGame
+from .ddpg import DDPG

@@ -14,18 +14,19 @@ environment:
 
 # GRADIENT BASED ALGORITHMS
 
-episodes: 1000
-
 ddpg:
-  replay_start:
-  buffer_size:
-  batch_size: 32
-  gamma: 0.99
-  tau: 0.001
-  actor_lr: 1e-4
-  critic_lr: 1e-3
-  n_episodes: 100000
-  n_runs:
+  n_episodes: 5000
+  buffer_size: 1000000
+  batch_size: 128
+  gamma: 0.995
+  tau: 0.01
+  actor_lr: 0.0001
+  critic_lr: 0.001
+  saved_weights:
+    actor: 'actor.h5'
+    critic: 'critic.h5'
+    target_actor: 'target_actor.h5'
+    target_critic: 'target_critic.h5'
 
 
 # EVOLUTIONARY ALGORITHMS
@@ -51,6 +52,7 @@ results:
   path: 'results'
   scores: 'scores'
   weights: 'weights'
+  saved_models: 'saved_models'
 
 visualization:
   path: 'visualization'
