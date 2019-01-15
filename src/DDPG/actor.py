@@ -45,10 +45,10 @@ class ActorNetwork(object):
     @staticmethod
     def create_actor_network(state_size, action_dim):
         state = Input(shape=[state_size])
-        h0 = Dense(256, activation='tanh', kernel_initializer=var_scaling)(state)
+        h0 = Dense(128, activation='tanh', kernel_initializer=var_scaling)(state)
         h1 = Dense(128, activation='tanh', kernel_initializer=var_scaling)(h0)
-        h2 = Dense(64, activation='tanh', kernel_initializer=var_scaling)(h1)
-        action = Dense(action_dim, activation='tanh', kernel_initializer=init)(h2)
+        # h2 = Dense(64, activation='relu', kernel_initializer=var_scaling)(h1)
+        action = Dense(action_dim, activation='tanh', kernel_initializer=init)(h1)
 
         model = Model(input=state, output=action)
         return model, model.trainable_weights, state

@@ -1,10 +1,15 @@
 import os
 import utils
 import analysis
-from config import POPULATION, GA, ES, CMA_ES, ENVIRONMENT
-from genetic import GeneticAlgorithm
+from config import POPULATION, GA, ES, CMA_ES, ENVIRONMENT, RANDOM_SEED
+from GA import GeneticAlgorithm
 from CMA_ES import CMAEvolutionStrategies
 from population import Agent, Population
+
+import numpy as np
+
+if RANDOM_SEED:
+    np.random.seed(RANDOM_SEED)
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -26,18 +31,15 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # agents.evolve(save=True)
 
 
-# weights = utils.get_best_agent(mean=False)
+# weights = utils.get_best_agent()
+
 # agent = Agent(ENVIRONMENT, weights)
 # score = agent.run_agent(render=True)
 # analysis.perturbate_weights(weights)
 
 
 #
-# agent = Agent(ENVIRONMENT)
-#
-# ddpg = DDPG(agent=agent)
-#
-# ddpg.run()
+
 
 from DDPG import playGame
 

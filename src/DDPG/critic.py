@@ -3,6 +3,7 @@ from keras.layers import Dense, Input, merge, Activation, concatenate
 from keras.models import Model
 from keras.optimizers import Adam
 from keras.initializers import RandomUniform, VarianceScaling
+from keras.regularizers import l2
 import keras.backend as K
 import tensorflow as tf
 
@@ -52,15 +53,16 @@ class CriticNetwork(object):
         # value = Dense(1, activation='linear')(h3)
 
         S = Input(shape=[state_size])
-        w1 = Dense(256, activation='relu', kernel_initializer=var_scaling)(S)
-        h1 = Dense(128, activation='linear', kernel_initializer=var_scaling)(w1)
+        h1 = Dense(128, activation='relu', kernel_initializer=var_scaling)(S)
+        # w1 = Dense(128, activation='relu', kernel_initializer=var_scaling, activity_regularizer=l2(0.01))(S)
+        # h1 = Dense(128, activation='linear', kernel_initializer=var_scaling)(w1)
 
         A = Input(shape=[action_size])
         a1 = Dense(128, activation='linear', kernel_initializer=var_scaling)(A)
 
         h2 = concatenate([h1, a1])
 
-        h3 = Dense(128, activation='relu', kernel_initializer=var_scaling)(h2)
+        h3 = Dense(128, activation='relu', kernel_initializer=var_scaling, activity_regularizer=l2(0.01))(h2)
         value = Dense(1, activation='linear', kernel_initializer=init)(h3)
 
         model = Model(input=[S, A], output=value)

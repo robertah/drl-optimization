@@ -79,7 +79,7 @@ def distances_gen(weights):
     """
     We calculate the distances from the average of the weights (as a vector without considering bias) for each generation,
     distances are calculated between consecutive generations and for each generation from the first one (initialization).
-    :param weights, np.array((n_generations, n_agents, n_weights)) returned by genetic.run_agent_genetic
+    :param weights, np.array((n_generations, n_agents, n_weights)) returned by GA.run_agent_genetic
     :return:
         consecutive_dist: list, distances between generation
         dist_from_init: list, distances from initialization
@@ -242,8 +242,8 @@ def plot_reward_along_eigenvectors(final_agent, n_times=2, file="hessian", from_
 
 
 if __name__ == '__main__':
-    from genetic import run_agent_genetic
-    from genetic.agent import Agent
+    from GA import run_agent_genetic
+    from GA.agent import Agent
     from config import ENVIRONMENT
     import matplotlib.pyplot as plt
     import os

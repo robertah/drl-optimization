@@ -17,9 +17,9 @@ def get_noisy_action(action, noise):
 def playGame(train_indicator=1):  # 1 means Train, 0 means simply Run
     BUFFER_SIZE = 1000000
     BATCH_SIZE = 128
-    GAMMA = 0.99
-    TAU = 0.001  # Target Network HyperParameters
-    LRA = 0.001  # Learning rate for Actor
+    GAMMA = 0.995
+    TAU = 0.01  # Target Network HyperParameters
+    LRA = 0.0001  # Learning rate for Actor
     LRC = 0.001  # Lerning rate for Critic
 
     action_size = ENVIRONMENT.action_size  # Steering/Acceleration/Brake
@@ -60,9 +60,9 @@ def playGame(train_indicator=1):  # 1 means Train, 0 means simply Run
 
         for j in range(max_steps):
             loss = 0
-            # epsilon -= 1.0 / EXPLORE
 
             action = actor.model.predict(state.reshape(1, state.shape[0]))
+            # print(action)
 
             action = get_noisy_action(action, noise)
 
@@ -91,6 +91,8 @@ def playGame(train_indicator=1):  # 1 means Train, 0 means simply Run
                 critic.target_train()
 
             total_reward += reward
+
+            # ENVIRONMENT.env.render()
 
             if np.array_equal(np.around(new_state, 3), np.around(state, 3)):
                break
