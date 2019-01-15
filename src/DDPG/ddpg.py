@@ -31,7 +31,7 @@ def playGame(train_indicator=1):  # 1 means Train, 0 means simply Run
 
     # EXPLORE = 100000.
     episode_count = 5000
-    max_steps = 1000
+    max_steps = 2000
     reward = 0
     done = False
     step = 0
@@ -73,7 +73,7 @@ def playGame(train_indicator=1):  # 1 means Train, 0 means simply Run
             s, a, r, new_s, d = buff.get_batch(BATCH_SIZE)
 
             y_t = r
-            target_q_values = critic.target_model.predict([s, actor.target_model.predict(new_s)])
+            target_q_values = critic.target_model.predict([new_s, actor.target_model.predict(new_s)])
 
             for k in range(len(d)):
                 if d[k]:
@@ -86,10 +86,15 @@ def playGame(train_indicator=1):  # 1 means Train, 0 means simply Run
                 a_for_grad = actor.model.predict(s)
                 grads = critic.gradients(s, a_for_grad)
                 actor.train(s, grads)
+
                 actor.target_train()
                 critic.target_train()
 
             total_reward += reward
+
+            if np.array_equal(np.around(new_state, 3), np.around(state, 3)):
+               break
+
             state = new_state
 
             # print("Episode", i, "Step", step, "Action", action, "Reward", reward, "Loss", loss)
