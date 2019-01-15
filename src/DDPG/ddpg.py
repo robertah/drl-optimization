@@ -147,7 +147,7 @@ class DDPG:
             self.actor.target_model.load_weights(self.target_actor_weights)
             self.critic.target_model.load_weights(self.target_critic_weights)
             print("Weights loaded successfully.")
-        except FileNotFoundError:
+        except (FileNotFoundError, OSError):
             print("Pre-trained weights not found.")
 
     def save_weights(self):

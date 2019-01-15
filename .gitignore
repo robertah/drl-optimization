@@ -112,5 +112,6 @@ venv.bak/
 *.log
 *.gif
 runs.yml
+*.h5
 
 !CartPole-v1-20190103183514.npy
