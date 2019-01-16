@@ -30,7 +30,7 @@ class DDPG:
         K.set_session(sess)
 
         self.actor = Actor(sess, self.environment.state_size, self.environment.action_size, self.batch_size,
-                           self.tau, self.actor_lr, self.environment.hidden_units, self.environment.activations)
+                           self.tau, self.actor_lr)
 
         self.critic = Critic(sess, self.environment.state_size, self.environment.action_size, self.batch_size,
                              self.tau, self.critic_lr)
@@ -81,12 +81,13 @@ class DDPG:
                 for j in range(self.environment.max_time):
                     # loss = 0
 
-                    # self.environment.env.render()
+                    self.environment.env.render()
 
                     action = self.actor.model.predict(state.reshape(1, state.shape[0]))
                     action = self.noise.get_noisy_action(action, j)
 
                     new_state, reward, done, info = self.environment.env.step(action[0])
+                    # td_error = reward + self.gamma * 1 - 1
 
                     self.buffer.add(state, action[0], reward, new_state, done)
 
@@ -139,13 +140,10 @@ class DDPG:
         except KeyboardInterrupt:
             if i >= 100:
                 print("Saving weights...")
-                LOGGER.log(environment=self.environment.name,
-                           timestamp=timestamp,
-                           algorithm=self.__class__.__name__,
-                           parameters=self.get_params(),
-                           episodes=i,
-                           score=previous_reward)
                 self.save_weights()
+
+        print("Saving weights...")
+        self.save_weights()
 
     def load_weights(self):
         try:

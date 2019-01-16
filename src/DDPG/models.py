@@ -14,7 +14,7 @@ init = RandomUniform(-0.003, 0.003)
 
 class Actor:
 
-    def __init__(self, sess, state_size, action_size, batch_size, tau, learning_rate, hidden_units, activations):
+    def __init__(self, sess, state_size, action_size, batch_size, tau, learning_rate):
         self.sess = sess
         self.batch_size = batch_size
         self.tau = tau
@@ -23,9 +23,8 @@ class Actor:
         K.set_session(sess)
 
         # Now create the model
-        self.model, self.weights, self.state = self.build_model(state_size, action_size, hidden_units, activations)
-        self.target_model, self.target_weights, self.target_state = self.build_model(state_size, action_size,
-                                                                                     hidden_units, activations)
+        self.model, self.weights, self.state = self.build_model(state_size, action_size)
+        self.target_model, self.target_weights, self.target_state = self.build_model(state_size, action_size)
         self.action_gradient = tf.placeholder(tf.float32, [None, action_size])
         self.params_grad = tf.gradients(self.model.output, self.weights, -self.action_gradient)
         grads = zip(self.params_grad, self.weights)
@@ -33,14 +32,14 @@ class Actor:
         self.sess.run(tf.global_variables_initializer())
         # self.model.summary()
 
-    def build_model(self, state_size, action_dim, hidden_units, activations):
+    def build_model(self, state_size, action_dim):
         state = Input(shape=[state_size])
 
-        h0 = Dense(256, activation='relu', kernel_initializer=unif_init)(state)
-        # h1 = Dense(128, activation='relu', kernel_initializer=var_scaling)(h0)
+        h0 = Dense(64, activation='relu', kernel_initializer=unif_init)(state)
+        h1 = Dense(64, activation='relu', kernel_initializer=unif_init)(h0)
         # h2 = Dense(64, activation='relu', kernel_initializer=var_scaling)(h1)
 
-        action = Dense(action_dim, activation='tanh', kernel_initializer=init)(h0)
+        action = Dense(action_dim, activation='relu', kernel_initializer=init)(h1)
 
         model = Model(inputs=state, outputs=action)
         return model, model.trainable_weights, state
@@ -78,7 +77,7 @@ class Critic:
 
     def build_model(self, state_size, action_size):
         state = Input(shape=[state_size])
-        h1 = Dense(256, activation='relu', kernel_initializer=unif_init)(state)
+        h1 = Dense(64, activation='relu', kernel_initializer=unif_init)(state)
         # h1 = Dense(128, activation='relu')(w1)
 
         action = Input(shape=[action_size])
@@ -86,10 +85,10 @@ class Critic:
 
         h2 = concatenate([h1, action])
 
-        h3 = Dense(256, activation='relu', kernel_initializer=unif_init)(h2)
+        h3 = Dense(64, activation='relu', kernel_initializer=unif_init)(h2)
 
-        h4 = Dense(128, activation='relu', kernel_initializer=unif_init)(h3)
-        value = Dense(1, activation='linear', kernel_initializer=init)(h4)
+        # h4 = Dense(64, activation='relu', kernel_initializer=unif_init)(h3)
+        value = Dense(1, activation='linear', kernel_initializer=init)(h3)
 
         model = Model(inputs=[state, action], outputs=value)
         adam = Adam(lr=self.lr, decay=0.0001)

@@ -41,7 +41,6 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 #
 
 
-from DDPG import DDPG
+from TD3 import train
 
-ddpg = DDPG(ENVIRONMENT, DDPG_Config)
-ddpg.run(train=True)
+train()

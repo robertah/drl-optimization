@@ -8,6 +8,7 @@ class ReplayBuffer:
 
     def __init__(self, buffer_size):
         self.buffer = deque()
+        # self.buffer = []
         self.buffer_size = buffer_size
         self.n_experiences = 0
 
@@ -25,3 +26,6 @@ class ReplayBuffer:
         else:
             self.buffer.popleft()
             self.buffer.append(experience)
+
+    # def sort_by_td(self):
+    #    self.buffer = sorted(self.buffer, key=lambda x: x[-1])

@@ -57,3 +57,16 @@ environments:
     policy: 'normal'
     solved:
       defined: False
+
+
+  - name: 'Hopper-v2'
+    n_hidden_units:
+      - 128
+      - 128
+    activations:
+      - 'relu'
+      - 'relu'
+    max_time: 10000
+    policy: 'normal'
+    solved:
+      defined: False
