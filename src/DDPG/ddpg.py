@@ -81,7 +81,7 @@ class DDPG:
                 for j in range(self.environment.max_time):
                     # loss = 0
 
-                    self.environment.env.render()
+                    # self.environment.env.render()
 
                     action = self.actor.model.predict(state.reshape(1, state.shape[0]))
                     action = self.noise.get_noisy_action(action, j)
