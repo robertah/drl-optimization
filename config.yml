@@ -15,7 +15,7 @@ environment:
 # GRADIENT BASED ALGORITHMS
 
 ddpg:
-  n_episodes: 5000
+  n_episodes: 3000
   buffer_size: 1000000
   batch_size: 128
   gamma: 0.99

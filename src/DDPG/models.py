@@ -7,7 +7,8 @@ from keras.models import Model
 from keras.optimizers import Adam
 from keras.regularizers import l2
 
-var_scaling = VarianceScaling()
+# var_scaling = VarianceScaling()
+unif_init = 'lecun_uniform'
 init = RandomUniform(-0.003, 0.003)
 
 
@@ -35,11 +36,11 @@ class Actor:
     def build_model(self, state_size, action_dim, hidden_units, activations):
         state = Input(shape=[state_size])
 
-        h0 = Dense(256, activation='relu', kernel_initializer=var_scaling)(state)
-        h1 = Dense(128, activation='relu', kernel_initializer=var_scaling)(h0)
-        h2 = Dense(64, activation='relu', kernel_initializer=var_scaling)(h1)
+        h0 = Dense(256, activation='relu', kernel_initializer=unif_init)(state)
+        # h1 = Dense(128, activation='relu', kernel_initializer=var_scaling)(h0)
+        # h2 = Dense(64, activation='relu', kernel_initializer=var_scaling)(h1)
 
-        action = Dense(action_dim, activation='tanh', kernel_initializer=init)(h2)
+        action = Dense(action_dim, activation='tanh', kernel_initializer=init)(h0)
 
         model = Model(inputs=state, outputs=action)
         return model, model.trainable_weights, state
@@ -77,19 +78,21 @@ class Critic:
 
     def build_model(self, state_size, action_size):
         state = Input(shape=[state_size])
-        w1 = Dense(256, activation='relu', kernel_initializer=var_scaling)(state)
-        h1 = Dense(128, activation='relu')(w1)
+        h1 = Dense(256, activation='relu', kernel_initializer=unif_init)(state)
+        # h1 = Dense(128, activation='relu')(w1)
 
         action = Input(shape=[action_size])
-        a1 = Dense(128, activation='relu', kernel_initializer=var_scaling)(action)
+        # a1 = Dense(128, activation='relu', kernel_initializer=var_scaling)(action)
 
-        h2 = concatenate([h1, a1])
+        h2 = concatenate([h1, action])
 
-        h3 = Dense(128, activation='relu', kernel_initializer=var_scaling)(h2)
-        value = Dense(1, activation='linear', kernel_initializer=init)(h3)
+        h3 = Dense(256, activation='relu', kernel_initializer=unif_init)(h2)
+
+        h4 = Dense(128, activation='relu', kernel_initializer=unif_init)(h3)
+        value = Dense(1, activation='linear', kernel_initializer=init)(h4)
 
         model = Model(inputs=[state, action], outputs=value)
-        adam = Adam(lr=self.lr)
+        adam = Adam(lr=self.lr, decay=0.0001)
         model.compile(loss='mse', optimizer=adam)
         return model, state, action
 

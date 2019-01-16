@@ -65,6 +65,12 @@ class DDPG:
 
         try:
 
+            for b in range(50000):
+                state = self.environment.env.reset()
+                action = self.actor.model.predict(state.reshape(1, state.shape[0]))
+                new_state, reward, done, info = self.environment.env.step(action[0])
+                self.buffer.add(state, action[0], reward, new_state, done)
+
             for i in range(self.n_episodes):
 
                 # get initial state
@@ -117,7 +123,7 @@ class DDPG:
                                    score=total_reward)
                         self.save_weights()
 
-                    if done or np.array_equal(np.around(new_state, 3), np.around(state, 3)):
+                    if done: # or np.array_equal(np.around(new_state, 3), np.around(state, 3)):
                         previous_reward = total_reward
                         break
 
