@@ -115,7 +115,7 @@ def train():
     env = ENVIRONMENT.env
     if record_video:
         eval_interval = TEST_STEPS
-        env = wrappers.Monitor(env, video_dir, video_callable=lambda ep: ep % 2 == 0)
+        env = wrappers.Monitor(env, video_dir, video_callable=lambda ep: ep % 100 == 0)
 
     # (summary_ops, summary_vars, eval_summary_ops, eval_summary_vars) = build_summaries()
 
