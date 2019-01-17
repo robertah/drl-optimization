@@ -27,6 +27,7 @@ LOGGER = Logger(os.path.join(ROOT_DIR, config['logger']))
 
 # A2C = ActorCriticConfig(config)
 DDPG_Config = DDPGConfig(config, RESULTS_SAVED_MODELS)
+TD3_Config = TD3Config(config, RESULTS_SAVED_MODELS)
 
 # EVOLUTIONARY ALGORITHMS
 

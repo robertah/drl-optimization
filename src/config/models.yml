@@ -39,7 +39,7 @@ environments:
     activations:
       - 'tanh'
       - 'tanh'
-    max_time: 1000
+    max_time: 1600
     policy: 'normal'
     solved:
       defined: True
