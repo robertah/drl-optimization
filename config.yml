@@ -60,21 +60,17 @@ genetic_algorithm:
   best: 5
   elite: 2
   noise_prob: 0.7
-  path: 'genetic'
-
-evolution_strategies:
-  learning_rate: 0.01
-  noise: 0.01
+  path: 'ga'
 
 cma_evolution_strategies:
   perc_selected: 0.25
-  path: 'cma_evolution_strategies'
+  path: 'cma_es'
 
 results:
   path: 'results'
+  training: 'training'
   scores: 'scores'
   weights: 'weights'
-  training: 'training'
 
 visualization:
   path: 'visualization'

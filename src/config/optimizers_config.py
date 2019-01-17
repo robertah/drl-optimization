@@ -2,24 +2,19 @@ import os
 
 
 class GeneticAlgorithmConfig:
-    def __init__(self, config):
+    def __init__(self, config, models_path):
         ga = config['genetic_algorithm']
         self.best = ga['best']
         self.elite = ga['elite']
         self.noise_prob = ga['noise_prob']
+        self.models_path = os.path.join(models_path, ga['path'])
 
 
 class CMAEvolutionStrategiesConfig:
-    def __init__(self, config):
+    def __init__(self, config, models_path):
         cma_es = config['cma_evolution_strategies']
         self.perc_selected = cma_es['perc_selected']
-
-
-class EvolutionStrategiesConfig:
-    def __init__(self, config):
-        es = config['evolution_strategies']
-        self.learning_rate = es['learning_rate']
-        self.noise = es['noise']
+        self.models_path = os.path.join(models_path, cma_es['path'])
 
 
 class DDPGConfig:

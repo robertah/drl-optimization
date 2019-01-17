@@ -34,8 +34,8 @@ environments:
 
   - name: 'BipedalWalker-v2'
     n_hidden_units:
-      - 128
-      - 128
+      - 512
+      - 256
     activations:
       - 'tanh'
       - 'tanh'

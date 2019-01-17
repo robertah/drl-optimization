@@ -291,9 +291,9 @@ if __name__ == '__main__':
 
     agents_weights, scores, children = run_agent_genetic(n_agents=20, n_generations=50)
 
-    initial_agent = Agent(ENVIRONMENT, weights=children[0])
-    final_agent = Agent(ENVIRONMENT, weights=children[-1])
-    final_agent_copy = Agent(ENVIRONMENT, weights=children[-1])
+    initial_agent = Agent(weights=children[0])
+    final_agent = Agent(weights=children[-1])
+    final_agent_copy = Agent(weights=children[-1])
     v1, v2, all_scores, alphas = plot_reward_along_eigenvectors(final_agent, from_file=True)
     t1, t2, s1, s2, threshold = compute_epsilon_threshold(all_scores)
     #print(v1,v2)
