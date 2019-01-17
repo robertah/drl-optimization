@@ -8,7 +8,7 @@ random_seed:
 # - Walker2d-v2
 
 environment:
-  name: 'Hopper-v2'
+  name: 'BipedalWalker-v2'
   n_runs_per_agent: 1
   animate: False
 
@@ -27,6 +27,29 @@ ddpg:
     critic: 'critic.h5'
     target_actor: 'target_actor.h5'
     target_critic: 'target_critic.h5'
+
+td3:
+  n_episodes: 3000
+  batch_size: 32
+  buffer_size: 1000000
+  buffer_size_warmup: 10000
+  gamma: 0.99
+  tau: 0.001
+  sigma: 05
+  sigma_tilda: 0.1
+  noise_cap: 0.1
+  train_interval: 2
+  test_every: 5
+  actor_lr: 1e-4
+  critic_lr: 2e-4
+  saved_weights:
+    path: 'td3'
+    actor: 'actor.h5'
+    critic1: 'critic1.h5'
+    critic2: 'critic2.h5'
+    target_actor: 'target_actor.h5'
+    target_critic1: 'target_critic1.h5'
+    target_critic2: 'target_critic2.h5'
 
 
 # EVOLUTIONARY ALGORITHMS

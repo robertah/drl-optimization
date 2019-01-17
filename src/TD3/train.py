@@ -14,11 +14,20 @@
 
 
 import gym
+from gym import wrappers
+
 import tensorflow as tf
 import numpy as np
 
+import pickle
+
 from .td3 import TD3
 from .util import *
+
+from config import ENVIRONMENT
+from config import TD3_Config as conf
+import os
+from datetime import datetime
 
 LR_C = 2e-4
 LR_A = 1e-4
@@ -28,7 +37,7 @@ NOISE_STD = 0.1
 BUFFER_SIZE = 1000000
 WARMUP_BUFFER = 10000
 BATCH_SIZE = 32
-N_EPISODES = 3000
+N_EPISODES = 5000
 TEST_STEPS = 100
 
 
@@ -50,6 +59,8 @@ TEST_STEPS = 100
 #     return summary_ops, summary_vars, eval_summary_ops, eval_summary_vars
 
 
+training = False
+
 def log_metrics(sess, writer, summary_ops, summary_vals, metrics, test=False):
     """Log metrics."""
     ep_cnt, ep_r, steps, actions, noises = metrics
@@ -69,7 +80,7 @@ def log_metrics(sess, writer, summary_ops, summary_vals, metrics, test=False):
     writer.flush()
 
 
-def test(env, agent):
+def test(env, agent=None):
     """Test the trained agent"""
     tf.logging.info('Testing ...')
     s = env.reset()
@@ -86,7 +97,6 @@ def test(env, agent):
         ep_reward += r
         ep_steps += 1
         s = s2
-    print(ep_reward)
     return ep_reward, ep_steps
 
 
@@ -94,17 +104,18 @@ def train():
     """Train."""
 
     # log_dir = os.path.join(config.job_dir, 'log')
-    # video_dir = os.path.join(config.job_dir, 'video')
-    # model_path = os.path.join(
-    #     config.job_dir, 'model/{}.ckpt'.format(config.agent))
 
-    env = gym.make('BipedalWalker-v2')
-    # if config.record_video:
-    #     eval_interval = config.eval_interval
-    #     env = wrappers.Monitor(
-    #         env, video_dir,
-    #         video_callable=lambda ep: (ep + 1 - (ep + 1) / eval_interval
-    #                                    ) % eval_interval == 0)
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    model_path = os.path.join(conf.models_path, '{}'.format(timestamp), 'model.ckpt')
+    results_path = os.path.join(conf.models_path, '{}'.format(timestamp), 'results.npy')
+    video_dir = os.path.join(conf.models_path, '{}'.format(timestamp), 'video')
+
+    rewards = []
+    record_video = True
+    env = ENVIRONMENT.env
+    if record_video:
+        eval_interval = TEST_STEPS
+        env = wrappers.Monitor(env, video_dir, video_callable=lambda ep: ep % 2 == 0)
 
     # (summary_ops, summary_vars, eval_summary_ops, eval_summary_vars) = build_summaries()
 
@@ -112,7 +123,7 @@ def train():
 
         agent = TD3(env, sess)
 
-        # saver = tf.train.Saver(max_to_keep=config.max_to_keep)
+        saver = tf.train.Saver(max_to_keep=50)
         # tf.logging.info('Start to train {} ...'.format(config.agent))
         init = tf.global_variables_initializer()
         sess.run(init)
@@ -120,9 +131,7 @@ def train():
 
         agent.initialize()
         global_step = 0
-        for i in range(N_EPISODES):
-
-            print("episode", i)
+        for i in range(N_EPISODES+1):
 
             s = env.reset()
             ep_reward = 0
@@ -132,6 +141,9 @@ def train():
             done = False
 
             while not done:
+
+                # env.render()
+
                 if ep_steps < 5:
                     action = agent.random_action(s)
                 else:
@@ -168,6 +180,7 @@ def train():
                     #                      noises))
                     if ep_cnt % 100 == 0:
                         eval_ep_reward, eval_ep_steps = test(env, agent)
+                        rewards.append(eval_ep_reward)
                         eval_ep_cnt = ep_cnt / 100
                         # log_metrics(sess,
                         #             writer,
@@ -179,9 +192,8 @@ def train():
                         #                      None,
                         #                      None),
                         #             test=True)
-                        # ckpt_path = saver.save(sess,
-                        #                        model_path,
-                        #                        global_step=global_step)
+                        saver.save(sess, model_path, global_step=ep_cnt)
+                        np.save(results_path, rewards)
                         # tf.logging.info('Model saved to {}'.format(ckpt_path))
     env.close()
 

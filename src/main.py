@@ -1,7 +1,7 @@
 import os
 import utils
 import analysis
-from config import POPULATION, GA, ES, CMA_ES, ENVIRONMENT, RANDOM_SEED, DDPG_Config
+from config import POPULATION, GA, ES, CMA_ES, ENVIRONMENT, RANDOM_SEED, DDPG_Config, TD3_Config
 from GA import GeneticAlgorithm
 from CMA_ES import CMAEvolutionStrategies
 from population import Agent, Population
@@ -44,3 +44,4 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 from TD3 import train
 
 train()
+
