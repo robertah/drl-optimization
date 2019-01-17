@@ -15,19 +15,19 @@ with open(os.path.join(ROOT_DIR, 'src', 'config', 'models.yml')) as m:
 
 RANDOM_SEED = config['random_seed']
 ENVIRONMENT = EnvironmentConfig(config, models, RANDOM_SEED)
-
+ALGORITHM = config['algorithm']
 
 RESULTS_SCORES = os.path.join(ROOT_DIR, config['results']['path'], config['results']['scores'])
 RESULTS_WEIGHTS = os.path.join(ROOT_DIR, config['results']['path'], config['results']['weights'])
-RESULTS_SAVED_MODELS = os.path.join(ROOT_DIR, config['results']['path'], config['results']['saved_models'])
+RESULTS_TRAINING = os.path.join(ROOT_DIR, config['results']['path'], config['results']['training'])
 
 VISUALIZATION_WEIGHTS = os.path.join(ROOT_DIR, config['visualization']['path'], config['visualization']['weights'])
 
 LOGGER = Logger(os.path.join(ROOT_DIR, config['logger']))
 
 # A2C = ActorCriticConfig(config)
-DDPG_Config = DDPGConfig(config, RESULTS_SAVED_MODELS)
-TD3_Config = TD3Config(config, RESULTS_SAVED_MODELS)
+DDPG_Config = DDPGConfig(config, RESULTS_TRAINING)
+TD3_Config = TD3Config(config, RESULTS_TRAINING)
 
 # EVOLUTIONARY ALGORITHMS
 

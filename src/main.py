@@ -1,15 +1,15 @@
 import os
-import utils
-import analysis
-from config import POPULATION, GA, ES, CMA_ES, ENVIRONMENT, RANDOM_SEED, DDPG_Config, TD3_Config
-from GA import GeneticAlgorithm
-from CMA_ES import CMAEvolutionStrategies
-from population import Agent, Population
 
 import numpy as np
+import tensorflow as tf
+
+from GA import GeneticAlgorithm
+from config import GA, RANDOM_SEED
+from population import Population
 
 if RANDOM_SEED:
     np.random.seed(RANDOM_SEED)
+    tf.random.set_random_seed(RANDOM_SEED)
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -23,11 +23,8 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 #
 # ga = GeneticAlgorithm(perc_selected=GA.selected, mutation_rate=GA.mutation_rate,
 #                       mutation_noise=GA.mutation_noise, elite=GA.elite)
-#
-# cma_es = CMAEvolutionStrategies(perc_selected=CMA_ES.selected)
-#
-# agents = Population(size=POPULATION.size, max_generations=POPULATION.max_generations, optimizer=cma_es)
-#
+# #
+# agents = Population(optimizer=ga)
 # agents.evolve(save=True)
 
 
@@ -40,8 +37,9 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 #
 
+#
+from TD3 import Agent
 
-from TD3 import train
-
-train()
+agent = Agent()
+agent.train()
 

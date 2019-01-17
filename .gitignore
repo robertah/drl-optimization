@@ -113,5 +113,6 @@ venv.bak/
 *.gif
 runs.yml
 *.h5
+results/saved_models/td3/*
 
 !CartPole-v1-20190103183514.npy

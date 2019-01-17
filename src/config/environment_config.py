@@ -16,7 +16,6 @@ class EnvironmentConfig:
             self.action_size = self.env.action_space.shape[0]
         if random_seed:
             self.env.seed(random_seed)
-        self.n_runs = environment['n_runs_per_agent']
         self.animate = environment['animate']
         for e in models['environments']:
             if e['name'] == self.name:

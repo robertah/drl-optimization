@@ -1,1 +1,1 @@
-from .train import train
+from .agent import Agent

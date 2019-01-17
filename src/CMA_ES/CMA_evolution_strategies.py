@@ -1,15 +1,12 @@
 import numpy as np
 from optimizers import EvolutionaryOptimizers
-
-from scipy.stats import multivariate_normal
-import logging
-import inspect
+from config import CMAEvolutionStrategiesConfig
 
 
 class CMAEvolutionStrategies(EvolutionaryOptimizers):
 
-    def __init__(self, perc_selected):
-        self.perc_selected = perc_selected
+    def __init__(self):
+        self.perc_selected = CMAEvolutionStrategiesConfig.perc_selected
         super(CMAEvolutionStrategies, self).__init__()
 
     def selection(self, scores, population_size):

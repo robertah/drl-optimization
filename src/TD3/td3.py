@@ -1,9 +1,10 @@
-from .replay_buffer import ReplayBuffer
-from .models import ActorNetwork, CriticNetwork
 import numpy as np
 
-from config import TD3_Config as td3_cfg
 from config import ENVIRONMENT as env_cfg
+from config import TD3_Config as td3_cfg
+from .models import Actor, Critic
+from .replay_buffer import ReplayBuffer
+
 
 class TD3():
     """TD3 agent."""
@@ -26,29 +27,11 @@ class TD3():
         self.train_interval = td3_cfg.train_interval
         self.actor_lr = td3_cfg.actor_lr
         self.critic_lr = td3_cfg.critic_lr
-        self.actor = ActorNetwork(sess=sess,
-                                  state_dim=self.state_size,
-                                  action_dim=self.action_size,
-                                  action_high=self.action_high,
-                                  action_low=self.action_low,
-                                  learning_rate=self.actor_lr,
-                                  tau=self.tau,
-                                  batch_size=self.batch_size)
-        self.critic1 = CriticNetwork(sess=sess,
-                                     state_dim=self.state_size,
-                                     action_dim=self.action_size,
-                                     learning_rate=self.critic_lr,
-                                     tau=self.tau,
-                                     gamma=self.gamma,
-                                     name='critic1')
-        self.critic2 = CriticNetwork(sess=sess,
-                                     state_dim=self.state_size,
-                                     action_dim=self.action_size,
-                                     learning_rate=self.critic_lr,
-                                     tau=self.tau,
-                                     gamma=self.gamma,
-                                     name='critic2')
-        self.replay_buffer = ReplayBuffer(buffer_size=self.buffer_size)
+        self.actor = Actor(sess, self.state_size, self.action_size, self.action_high, self.action_low, self.actor_lr,
+                           self.tau, self.batch_size)
+        self.critic1 = Critic(sess, self.state_size, self.action_size, self.critic_lr, self.tau, self.gamma, 'critic1')
+        self.critic2 = Critic(sess, self.state_size, self.action_size, self.critic_lr, self.tau, self.gamma, 'critic2')
+        self.replay_buffer = ReplayBuffer(self.buffer_size)
 
     def initialize(self):
         """Initialization before playing."""
