@@ -16,7 +16,6 @@ class EnvironmentConfig:
             self.action_size = self.env.action_space.shape[0]
         if random_seed:
             self.env.seed(random_seed)
-        self.n_runs = environment['n_runs_per_agent']
         self.animate = environment['animate']
         for e in models['environments']:
             if e['name'] == self.name:
@@ -25,4 +24,11 @@ class EnvironmentConfig:
                 self.hidden_units = e['n_hidden_units']
                 self.activations = e['activations']
                 self.max_time = e['max_time']
+                self.env._max_episode_steps = self.max_time
                 self.policy = e['policy']
+                solved = e['solved']
+                self.solving = solved['defined']
+                if self.solving:
+                    self.solving_avg_score = solved['average_score']
+                    self.solving_n_trials = solved['consecutive_trials']
+

@@ -1,26 +1,17 @@
 import numpy as np
 from keras.layers import Dense
 from keras.models import Sequential
+from keras.initializers import RandomNormal, RandomUniform
+from config import ENVIRONMENT, POPULATION
 
 
 class Agent:
 
-    def __init__(self, environment_config, weights=None):
-        self.env = environment_config
+    def __init__(self, weights=None):
+        self.env = ENVIRONMENT
         self.model = self.build_model()
         if weights is not None:
             self.model.set_weights(weights)
-
-    # def build_model(self):
-    #     model = Sequential()
-    #     model.add(Dense(ENVIRONMENT.hidden_units[0], input_dim=self.state_size, activation='relu',
-    #                     kernel_initializer='glorot_uniform'))
-    #     if len(ENVIRONMENT.hidden_units) > 1:
-    #         for i in range(1, len(ENVIRONMENT.hidden_units)):
-    #             model.add(Dense(ENVIRONMENT.hidden_units[i], activation='relu', kernel_initializer='glorot_uniform'))
-    #     model.add(Dense(self.action_size, activation='softmax', kernel_initializer='he_uniform'))
-    #     # model.summary()
-    #     return model
 
     def build_model(self):
         '''
@@ -53,9 +44,6 @@ class Agent:
 
     def get_action(self, state):
         policy = self.model.predict(state, batch_size=1).flatten()
-        # secondo me non ha molto senso fare una multinomial perchè ora non stiamo trainando niente quindi è solo una cosa deterministica che sceglie l'azione in base alla policy, dall'esploration non trarrebbe effettivamente nessun vantaggio se non eventualmente un punteggio più alto dovuto alla casualità del sampling e che quindi non rispecchia proprimanete la policy e lo stesso per un punteggio più basso.
-        # per questo prenderei soltanto l'azione con la probabilità maggiore
-        # return np.random.choice(self.action_size, 1, p=policy)[0]
         if self.env.policy == 'normal':
             return policy
         elif self.env.policy == 'argmax':
@@ -66,8 +54,7 @@ class Agent:
         if render is None:
             render = self.env.animate
         scores = []
-
-        for i in range(self.env.n_runs):
+        for i in range(POPULATION.n_runs):
             done = False
             score = 0
             state = self.env.env.reset()
@@ -81,10 +68,6 @@ class Agent:
                 next_state, reward, done, info = self.env.env.step(action)
                 next_state = np.reshape(next_state, [1, self.env.state_size])
                 score += reward
-                # The following if condition is usefull to kill the agent if it is stuck in a position
-                if np.array_equal(np.around(next_state, 3), np.around(state, 3)):
-                    return score
-
                 state = next_state
 
                 if done:

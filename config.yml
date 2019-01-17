@@ -1,37 +1,84 @@
+# CONFIGURATION FILE
+# it contains environments, model settings, and algorithm's parameters used.
+
 random_seed: 42
 
-# POSSIBLE ENVIRONMENTS:
-# - CartPole-v1
-# - Acrobot-v1
-# - Pendulum-v0
-# - BipedalWalker-v2
-# - Walker2d-v2
+##############################################################################
+#  ENVIRONMENT        #  CartPole-v1          #  BipedalWalker-v2            #
+#---------------------#-----------------------#------------------------------#
+#  Gradient-based     #  Q Learning           #  TD3 (Twin Delayed DDPG)     #
+#  Gradient-free      #  Genetic Algorithm    #  Genetic Algorithm           #
+##############################################################################
 
 environment:
-  name: 'BipedalWalker-v2'
-  n_runs_per_agent: 3
+  name: 'BipedalWalker-v2'   # 'CartPole-v1' or 'BipedalWalker-v2'
   animate: False
+
+algorithm: 'td3'        # 'q_learning' or 'td3' or 'ga'
+
+
+###############################################################################
+
+# GRADIENT BASED ALGORITHMS
+
+ddpg:
+  n_episodes: 100000
+  buffer_size: 1000000
+  batch_size: 128
+  gamma: 0.99
+  tau: 0.01
+  actor_lr: 0.0001
+  critic_lr: 0.001
+  path: 'ddpg'
+
+td3:
+  n_episodes: 5000
+  batch_size: 32
+  buffer_size: 1000000
+  buffer_size_warmup: 10000
+  gamma: 0.99
+  tau: 0.001
+  sigma: 0.5
+  sigma_tilda: 0.1
+  noise_cap: 0.1
+  train_interval: 2
+  test_every: 10
+  record_videos: 100
+  actor_lr: 0.0001
+  critic_lr: 0.0002
+  path: 'td3'
+
+
+# EVOLUTIONARY ALGORITHMS
 
 population:
   size: 50
   max_generations: 200
+  n_runs_per_agent: 3
 
 genetic_algorithm:
-  perc_selected: 0.2
+  perc_selected: 0.25
   mutation_rate: 0.2
   mutation_noise: 1
   elite: 3
+  path: 'genetic'
+
+evolution_strategies:
+  learning_rate: 0.01
+  noise: 0.01
 
 cma_evolution_strategies:
   perc_selected: 0.25
+  path: 'cma_evolution_strategies'
 
 results:
   path: 'results'
   scores: 'scores'
   weights: 'weights'
+  training: 'training'
 
 visualization:
   path: 'visualization'
   weights: 'weights'
 
-logger: 'logs.log'
+logger: 'runs.yml'

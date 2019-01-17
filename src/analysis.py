@@ -1,5 +1,6 @@
 import numpy as np
-from genetic import Agent
+from population import Agent
+from config import ENVIRONMENT
 
 
 def perturbate_weights(weights, n=5, noise_scale=1, render=False):

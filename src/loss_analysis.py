@@ -79,7 +79,7 @@ def distances_gen(weights):
     """
     We calculate the distances from the average of the weights (as a vector without considering bias) for each generation,
     distances are calculated between consecutive generations and for each generation from the first one (initialization).
-    :param weights, np.array((n_generations, n_agents, n_weights)) returned by genetic.run_agent_genetic
+    :param weights, np.array((n_generations, n_agents, n_weights)) returned by GA.run_agent_genetic
     :return:
         consecutive_dist: list, distances between generation
         dist_from_init: list, distances from initialization
@@ -105,9 +105,9 @@ def compute_second_derivative(i1, i2, loss_f, point, epsilon):
     """
     computes the second derivative of loss_f in point, with respect to the i1-th and i2-th directions
     :param i1: first direction
-    :type int
+    :type i1: int
     :param i2: second direction
-    :type int
+    :type i2: int
     :param loss_f: function for which we want to compute the second derivative
     :param point: point of evaluation
     :param epsilon: approximation constant (should be small)
@@ -186,7 +186,7 @@ def plot_surface_3d(X, Y, Z):
 
 def evaluate_in_neighborhood(f, weights, d1, d2, n_steps=20):
     """
-    evaluate function f in a neighborhood of it around weights along directions d1 and d2
+    Evaluate function f in a neighborhood of it around weights along directions d1 and d2
     :param f: the function of interest
     :param weights: the point of evaluation
     :param d1: the first direction of perturbation
@@ -245,7 +245,7 @@ def compute_epsilon_threshold(scores, epsilon=0.70, n_steps=80):
 
 def plot_reward_along_eigenvectors(final_agent, n_times=2, file="hessian", from_file=False):
     """
-    plots the reward function along the directions of maximum variation of the curvature. These
+    Plots the reward function along the directions of maximum variation of the curvature. These
     directions are defined by the eigenvectors corresponding to the two largest eigenvalues of the hessian.
     Use this function to evaluate the robustness of the agent.
     :param final_agent: the trained agent
@@ -281,8 +281,8 @@ def plot_reward_along_eigenvectors(final_agent, n_times=2, file="hessian", from_
 
 
 if __name__ == '__main__':
-    from genetic import run_agent_genetic
-    from genetic.agent import Agent
+    from GA import run_agent_genetic
+    from GA.agent import Agent
     from config import ENVIRONMENT
     import matplotlib.pyplot as plt
     import os
