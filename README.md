@@ -34,7 +34,12 @@ For each environment, we defined a specific neural network architecture in [`src
 ### Train agents
 `python src/main.py`
 
-Please, make sure that you have set the desired environment and optimization algorithm in [`config.yml`](config.yml), before running.
+Please, make sure that you have set the desired environment and optimization algorithm in [`config.yml`](config.yml), before start training.
+
+If you are using a machine without a display, please run the following instead:
+
+`xvfb-run -s "-screen 0 1400x900x24" python src/main.py`
+
 
 ### Results analysis
 The analysis of the different DRL optimization algorithms can be found in `notebooks/FILE`. 
@@ -64,3 +69,5 @@ The analysis of the different DRL optimization algorithms can be found in `noteb
 └── requirements.txt   # list of all packages used
 
 ```
+
+**Note**: the code has been tested on the following machines: macOS and Ubuntu computers, Leonhard cluster and Google Cloud Platform virtual machine.
