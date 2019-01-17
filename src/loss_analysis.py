@@ -4,6 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
+
 def interpolate(initial_agent, final_agent, objective, n_steps):
     """
     interpolation method to evaluate the path from initial weights to final weights
@@ -35,10 +36,10 @@ def interpolate(initial_agent, final_agent, objective, n_steps):
 
     new_weights = weighted_initial_weights + weighted_final_weights
     # we need a random agent
-    agent = Agent(ENVIRONMENT)
+    agent = Agent(environment_config=initial_agent.env)
     objective_values = np.apply_along_axis(lambda row: objective(row, agent), axis=1, arr=new_weights)
 
-    return objective_values, alphas 
+    return objective_values, alphas
 
 
 def from_agent_to_weights(agent):
@@ -49,7 +50,6 @@ def from_agent_to_weights(agent):
             layer = layer.reshape(layer.shape[0]*layer.shape[1],)
         flattened_weights.extend(layer.tolist())
     return np.array(flattened_weights)
-
 
 
 def from_weights_to_layers(weights, agent):
@@ -68,7 +68,7 @@ def from_weights_to_layers(weights, agent):
     return new_layers
 
 
-def execute_agent_multiple_times(weights, agent, n_times=20):
+def execute_agent_multiple_times(weights, agent, n_times=5):
     new_layers = from_weights_to_layers(weights, agent)
     agent.model.set_weights(new_layers)
     scores = [agent.run_agent() for _ in range(n_times)]
@@ -195,14 +195,52 @@ def evaluate_in_neighborhood(f, weights, d1, d2, n_steps=20):
     :return: the function evaluated at all the points, and an array containing
             the magnitudes of perturbation
     """
-    alphas = np.linspace(-1.0, 1.0, n_steps)
+    alphas = np.linspace(-2.0, 2.0, n_steps)
     scores = []
+    print("evaluating the neighborhood")
     for i,a1 in enumerate(alphas.tolist()):
         for a2 in alphas.tolist():
             score = f(weights + d1*a1 + d2*a2)
             scores.append(score)
         print("finished step {}/{}".format(i+1, alphas.shape[0]))
     return np.array(scores), alphas
+
+
+def compute_epsilon_threshold(scores, epsilon=0.70, n_steps=80):
+    max_index = int(n_steps / 2)
+    scores = np.reshape(scores, (n_steps, n_steps))
+    maximum = scores[max_index, max_index]
+    threshold = maximum * epsilon
+    print("maximum: ", maximum)
+    s2 = scores[max_index, :]
+    i = 0
+    print(s2)
+    for i,_ in enumerate(s2.tolist()):
+        s = s2[max_index + i]
+        if s <= threshold:
+            i = max_index + i
+            break
+        s = s2[max_index - i]
+        if s <= threshold:
+            i = max_index - i
+            break
+
+    s1 = scores[:, max_index]
+    j = 0
+    print(s1)
+    for j, _ in enumerate(s1.tolist()):
+        s_ = s1[max_index + j]
+        if s_ <= threshold:
+            print("exit", s_)
+            j = max_index + j
+            break
+        s_ = s1[max_index - j]
+        if s_ <= threshold:
+            print("exit", s_)
+            j = max_index - j
+            break
+    print(j, i)
+    return j, i, s1, s2, threshold
 
 
 def plot_reward_along_eigenvectors(final_agent, n_times=2, file="hessian", from_file=False):
@@ -212,7 +250,7 @@ def plot_reward_along_eigenvectors(final_agent, n_times=2, file="hessian", from_
     Use this function to evaluate the robustness of the agent.
     :param final_agent: the trained agent
     :param n_times: the reward function has of course no analytical form. Therefore to evaluate it
-                    we run the agent and see the score. We want to take into account different possibile
+                    we run the agent and see the score. We want to take into account different possible
                     initial conditions, and we do it by running the agent multiple times and average the scores.
                     Set this parameter larger than one only if the mapping weights -> reward is not deterministic
                     or if you may have different initial conditions at each execution.
@@ -237,8 +275,9 @@ def plot_reward_along_eigenvectors(final_agent, n_times=2, file="hessian", from_
 
     v1, v2 = get_top_eigenvector(h)
     scores, alphas = evaluate_in_neighborhood(run_agent_multiple_times, final_weights, v1, v2, n_steps=80)
+    print(scores.shape)
     plot_surface_3d(alphas, alphas, scores)
-    return v1,v2
+    return v1,v2, scores, alphas
 
 
 if __name__ == '__main__':
@@ -250,17 +289,42 @@ if __name__ == '__main__':
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
-    agents_weights, scores, children = run_agent_genetic(n_agents=20, n_generations=30)
+    agents_weights, scores, children = run_agent_genetic(n_agents=20, n_generations=50)
 
     initial_agent = Agent(ENVIRONMENT, weights=children[0])
     final_agent = Agent(ENVIRONMENT, weights=children[-1])
+    final_agent_copy = Agent(ENVIRONMENT, weights=children[-1])
+    v1, v2, all_scores, alphas = plot_reward_along_eigenvectors(final_agent, from_file=True)
+    t1, t2, s1, s2, threshold = compute_epsilon_threshold(all_scores)
+    #print(v1,v2)
 
-    v1, v2 = plot_reward_along_eigenvectors(final_agent, from_file=True)
-    print(v1,v2)
+    print("threshold along v1 and v2")
+    print(alphas[t1], alphas[t2])
 
     consecutive_dist, dist_init = distances_gen(agents_weights)
-    inter_results, alphas = interpolate(initial_agent, final_agent, execute_agent_multiple_times, n_steps=40)
-    #np.save("run_results", run_results)
+
+    plt.plot(alphas, s1, 'r', label='reward function along eigenvector 1')
+    plt.plot(alphas, np.ones(alphas.shape)*threshold, 'b', label='epsilon threshold')
+    plt.vlines(alphas[t1], 0, threshold, linestyles='dashed', label="perturbation magnitude")
+    plt.ylabel('threshold: {}'.format(threshold))
+    #plt.xlabel('eps')
+    plt.grid(True)
+    plt.legend()
+    plt.title('function along eigenvector relative to largest eigenvalue')
+    plt.show()
+
+    plt.plot(alphas, s2, 'r', label='reward function along eigenvector 2')
+    plt.plot(alphas, np.ones(alphas.shape)*threshold, 'b', label='epsilon threshold')
+    plt.vlines(alphas[t2], 0, threshold, linestyles='dashed', label="perturbation magnitude")
+    plt.ylabel('threshold: {}'.format(threshold))
+    #plt.xlabel('eps')
+    plt.grid(True)
+    plt.legend()
+    plt.title('function along eigenvector relative to second largest eigenvalue')
+    plt.show()
+
+    print("interpolating")
+    inter_results, alphas = interpolate(initial_agent, final_agent_copy, execute_agent_multiple_times, n_steps=80)
     np.save("interpolation_results", inter_results)
 
     plt.scatter(alphas, inter_results)

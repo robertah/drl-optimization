@@ -41,7 +41,7 @@ def run_agent_genetic_alternative(n_init_agents=300, n_agents=50, n_generations=
     :param save:
     :return:
     '''
-    n_weights = len(Agent().model.get_weights())
+    n_weights = len(Agent(ENVIRONMENT).model.get_weights())
 
     agents_weights = np.empty((n_generations-1, n_agents, n_weights), dtype=np.ndarray)
     agents_init_weights = np.empty((n_init_agents, n_weights), dtype=np.ndarray)
@@ -51,8 +51,8 @@ def run_agent_genetic_alternative(n_init_agents=300, n_agents=50, n_generations=
     children = np.empty((n_generations, n_weights), dtype=np.ndarray)
 
     # initialize agents
-    init_agents = [Agent() for _ in range(n_init_agents)]
-    agents = [Agent() for _ in range(n_agents)]
+    init_agents = [Agent(ENVIRONMENT) for _ in range(n_init_agents)]
+    agents = [Agent(ENVIRONMENT) for _ in range(n_agents)]
 
     for i in range(n_generations):
         print(i)
@@ -79,7 +79,7 @@ def run_agent_genetic_alternative(n_init_agents=300, n_agents=50, n_generations=
 
 def run_agent_genetic_2( n_agents=50, n_generations=50, save=True):
     #This use crossover function 2 and generate popuation 2 instead of 1
-    n_weights = len(Agent().model.get_weights())
+    n_weights = len(Agent(ENVIRONMENT).model.get_weights())
 
     agents_weights = np.empty((n_generations, n_agents, n_weights), dtype=np.ndarray)
     scores = np.empty((n_generations, n_agents), dtype=float)
