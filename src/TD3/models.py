@@ -12,7 +12,7 @@ class Actor:
         self.a_high = action_high
         self.a_low = action_low
         self.learning_rate = learning_rate
-        self.grad_norm_clip = 5
+        self.grad_norm_clip = 3
         self.tau = tau
         self.batch_size = batch_size
 
@@ -23,7 +23,7 @@ class Actor:
             self.target_obs, self.target_action = self.create_actor_network()
         self.target_params = tf.trainable_variables(scope=name + '_target')
 
-        self.update_target_op, self.action_gradient, self.train_op = self.create_actor_ops()
+        (self.update_target_op, self.action_gradient, self.train_op) = self.create_actor_ops()
 
     def create_actor_ops(self):
         target_update_op = tf.group([x.assign(tf.multiply(y, self.tau) + tf.multiply(x, 1. - self.tau)) for x, y in
@@ -82,7 +82,7 @@ class Critic:
              self.target_q_value) = self.create_critic_network()
         self.target_params = tf.trainable_variables(scope=name + '_target')
 
-        self.update_target_op, self.y_ph, self.train_op, self.action_grad = self.create_critic_ops()
+        (self.update_target_op, self.y_ph, self.train_op, self.action_grad) = self.create_critic_ops()
 
     def create_critic_ops(self):
         target_update_op = tf.group([x.assign(tf.multiply(y, self.tau) + tf.multiply(x, 1. - self.tau)) for x, y in

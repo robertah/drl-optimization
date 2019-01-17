@@ -4,10 +4,9 @@ import os
 class GeneticAlgorithmConfig:
     def __init__(self, config):
         ga = config['genetic_algorithm']
-        self.selected = ga['perc_selected']
-        self.mutation_rate = ga['mutation_rate']
-        self.mutation_noise = ga['mutation_noise']
+        self.best = ga['best']
         self.elite = ga['elite']
+        self.noise_prob = ga['noise_prob']
 
 
 class CMAEvolutionStrategiesConfig:

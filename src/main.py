@@ -21,9 +21,8 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # weights = get_best_agent(mean=True, timestamp='20190103183514')
 # perturbate_weights(weights)
 #
-# ga = GeneticAlgorithm(perc_selected=GA.selected, mutation_rate=GA.mutation_rate,
-#                       mutation_noise=GA.mutation_noise, elite=GA.elite)
-# #
+# ga = GeneticAlgorithm(best=GA.best, elite=GA.elite, noise_prob=GA.noise_prob)
+#
 # agents = Population(optimizer=ga)
 # agents.evolve(save=True)
 
