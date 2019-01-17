@@ -38,10 +38,10 @@ td3:
   buffer_size_warmup: 10000
   gamma: 0.99
   tau: 0.001
-  sigma: 0.1
+  sigma: 0.5
   sigma_tilda: 0.1
   noise_cap: 0.1
-  train_interval: 3
+  train_interval: 2
   test_every: 10
   record_videos: 100
   actor_lr: 0.0001
