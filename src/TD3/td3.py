@@ -1,86 +1,60 @@
-# Copyright 2018 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-"""Implementation of a TD3 agent.
-
-Implementation of TD3 - Twin Delayed Deep Deterministic Policy Gradient
-Algorithm and hyperparameter details can be found here:
-https://arxiv.org/pdf/1802.09477.pdf
-
-"""
-
 from .replay_buffer import ReplayBuffer
 from .models import ActorNetwork, CriticNetwork
 import numpy as np
 
-LR_C = 2e-4
-LR_A = 1e-4
-GAMMA = 0.99
-TAU = 0.001
-NOISE_STD = 0.1
-BUFFER_SIZE = 1000000
-WARMUP_BUFFER = 10000
-BATCH_SIZE = 32
-N_EPISODES = 3000
-TEST_STEPS = 100
+from config import TD3_Config as td3_cfg
+from config import ENVIRONMENT as env_cfg
 
 class TD3():
     """TD3 agent."""
 
-    def __init__(self, env, sess):
+    def __init__(self, sess):
         """Initialize members."""
-        state_dim = env.observation_space.shape[0]
-        self.env = env
-        self.action_dim = env.action_space.shape[0]
-        self.action_high = env.action_space.high
-        self.action_low = env.action_space.low
-        self.batch_size = BATCH_SIZE
-        self.warmup_size = WARMUP_BUFFER
-        self.gamma = GAMMA
-        self.sigma = 0.5
-        self.sigma_tilda = 0.1
-        self.noise_cap = 0.1
-        self.train_interval = 2
+        self.env = env_cfg.env
+        self.state_size = env_cfg.state_size
+        self.action_size = env_cfg.action_size
+        self.action_high = self.env.action_space.high
+        self.action_low = self.env.action_space.low
+        self.batch_size = td3_cfg.batch_size
+        self.buffer_size = td3_cfg.buffer_size
+        self.warmup_size = td3_cfg.buffer_size_warmup
+        self.tau = td3_cfg.tau
+        self.gamma = td3_cfg.gamma
+        self.sigma = td3_cfg.sigma
+        self.sigma_tilda = td3_cfg.sigma_tilda
+        self.noise_cap = td3_cfg.noise_cap
+        self.train_interval = td3_cfg.train_interval
+        self.actor_lr = td3_cfg.actor_lr
+        self.critic_lr = td3_cfg.critic_lr
         self.actor = ActorNetwork(sess=sess,
-                                  state_dim=state_dim,
-                                  action_dim=self.action_dim,
+                                  state_dim=self.state_size,
+                                  action_dim=self.action_size,
                                   action_high=self.action_high,
                                   action_low=self.action_low,
-                                  learning_rate=LR_A,
-                                  tau=TAU,
-                                  batch_size=BATCH_SIZE)
+                                  learning_rate=self.actor_lr,
+                                  tau=self.tau,
+                                  batch_size=self.batch_size)
         self.critic1 = CriticNetwork(sess=sess,
-                                     state_dim=state_dim,
-                                     action_dim=self.action_dim,
-                                     learning_rate=LR_C,
-                                     tau=TAU,
-                                     gamma=GAMMA,
+                                     state_dim=self.state_size,
+                                     action_dim=self.action_size,
+                                     learning_rate=self.critic_lr,
+                                     tau=self.tau,
+                                     gamma=self.gamma,
                                      name='critic1')
         self.critic2 = CriticNetwork(sess=sess,
-                                     state_dim=state_dim,
-                                     action_dim=self.action_dim,
-                                     learning_rate=LR_C,
-                                     tau=TAU,
-                                     gamma=GAMMA,
+                                     state_dim=self.state_size,
+                                     action_dim=self.action_size,
+                                     learning_rate=self.critic_lr,
+                                     tau=self.tau,
+                                     gamma=self.gamma,
                                      name='critic2')
-        self.replay_buffer = ReplayBuffer(buffer_size=BUFFER_SIZE)
+        self.replay_buffer = ReplayBuffer(buffer_size=self.buffer_size)
 
     def initialize(self):
         """Initialization before playing."""
         self.update_targets()
 
-    def random_action(self, observation):
+    def random_action(self):
         """Return a random action."""
         return self.env.action_space.sample()
 
@@ -93,8 +67,8 @@ class TD3():
         if self.replay_buffer.size > self.warmup_size:
             action = self.action(observation)
         else:
-            action = self.random_action(observation)
-        noise = np.clip(np.random.randn(self.action_dim) * self.sigma,
+            action = self.random_action()
+        noise = np.clip(np.random.randn(self.action_size) * self.sigma,
                         -self.noise_cap, self.noise_cap)
         action_with_noise = action + noise
         return (np.clip(action_with_noise, self.action_low, self.action_high),
@@ -108,7 +82,7 @@ class TD3():
         """Train the agent's policy for 1 iteration."""
         if self.replay_buffer.size > self.warmup_size:
             s0, a, r, t, s1 = self.replay_buffer.sample_batch(self.batch_size)
-            epsilon = np.clip(np.random.randn(self.batch_size, self.action_dim),
+            epsilon = np.clip(np.random.randn(self.batch_size, self.action_size),
                               -self.noise_cap, self.noise_cap)
             target_actions = self.actor.get_target_action(s1) + epsilon
             target_actions = np.clip(target_actions,

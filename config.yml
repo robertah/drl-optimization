@@ -38,18 +38,12 @@ td3:
   sigma: 05
   sigma_tilda: 0.1
   noise_cap: 0.1
-  train_interval: 2
-  test_every: 5
-  actor_lr: 1e-4
-  critic_lr: 2e-4
-  saved_weights:
-    path: 'td3'
-    actor: 'actor.h5'
-    critic1: 'critic1.h5'
-    critic2: 'critic2.h5'
-    target_actor: 'target_actor.h5'
-    target_critic1: 'target_critic1.h5'
-    target_critic2: 'target_critic2.h5'
+  train_interval: 3
+  test_every: 50
+  record_videos: 100
+  actor_lr: 0.0001
+  critic_lr: 0.0002
+  path: 'td3'
 
 
 # EVOLUTIONARY ALGORITHMS

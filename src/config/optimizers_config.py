@@ -53,8 +53,9 @@ class TD3Config:
         self.noise_cap = td3['noise_cap']
         self.train_interval = td3['train_interval']
         self.test_every = td3['test_every']
+        self.record_videos = td3['record_videos']
         self.actor_lr = td3['actor_lr']
         self.critic_lr = td3['critic_lr']
-        self.models_path = os.path.join(models_path, td3['saved_weights']['path'])
+        self.models_path = os.path.join(models_path, td3['path'])
 
 

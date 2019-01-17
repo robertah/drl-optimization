@@ -6,7 +6,7 @@ class Logger:
     def __init__(self, filename, ):
         self.filename = filename
 
-    def log(self, environment, timestamp, algorithm, parameters, generations=None, episodes=None, score=None):
+    def log(self, environment, timestamp, algorithm, parameters, generations=None, total_steps=None, score=None):
         if generations:
             run = {'run':
                        {'environment': environment,
@@ -23,7 +23,7 @@ class Logger:
                         'timestamp': timestamp,
                         'algorithm': algorithm,
                         'parameters': parameters,
-                        'n_episodes': episodes,
+                        'total_steps': total_steps,
                         'score': int(score),
                         }
 

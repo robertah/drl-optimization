@@ -120,7 +120,7 @@ class DDPG:
                                    timestamp=timestamp,
                                    algorithm=self.__class__.__name__,
                                    parameters=self.get_params(),
-                                   episodes=i,
+                                   total_steps=i,
                                    score=total_reward)
                         self.save_weights()
 
