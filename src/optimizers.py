@@ -15,7 +15,7 @@ class EvolutionaryOptimizers(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def terminate(population, generation, score_threshold=195, perc_threshold=0.95, n_consecutive=5):
+    def terminate(population, generation, perc_threshold=0.95):
         """
         Check if conditions to terminate genetic algorithm are satified:
         terminate genetic, if ``perc_threshold`` of total agents have scored the ``score_threshold``, in the last
@@ -25,15 +25,11 @@ class EvolutionaryOptimizers(ABC):
         :type population:
         :param generation: generation index
         :type generation: int
-        :param score_threshold: maximum score
-        :type score_threshold: int or float
-        :param perc_threshold: percentage of agents that should reach the ``score_threshold``
-        :type perc_threshold: float between 0 and 1
-        :param n_consecutive: number of last consecutive generations
-        :type n_consecutive: int
         :return:
         """
-        assert 0 < perc_threshold <= 1
+
+        score_threshold = ENVIRONMENT.solving_avg_score
+        n_consecutive = ENVIRONMENT.solving_n_trials
 
         if generation >= n_consecutive:
             last_runs = population.scores[generation - n_consecutive:generation]
@@ -68,7 +64,8 @@ class EvolutionaryOptimizers(ABC):
         agents = population.create_population()
 
         for i in range(population.max_generations):
-            if not self.terminate(population, i):
+            # if not self.terminate(population, i):
+            if True:
                 try:
                     population.agents_weights[i] = np.array([a.model.get_weights() for a in agents], dtype=np.ndarray)
 

@@ -1,9 +1,31 @@
 import numpy as np
-import scipy
+# import scipy
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from population import Agent
 from matplotlib import cm
+
+from scipy.spatial.distance import euclidean
+
+
+def perturbate_weights(weights, n=5, noise_scale=1, render=False):
+    """
+    Randomly perturbate final weights, to verify the optimality condition
+
+    :param weights: weights of the agent
+    :type weights: array of weights and bias of neural network's layers
+    :param n: number of perturbations
+    :type n: int
+    :param noise_scale: gaussian noise scale
+    :type noise_scale: int or float
+    :param render: animate the agent
+    :type render: bool
+    """
+    for i in range(n):
+        noise = np.random.normal(scale=noise_scale)
+        agent = Agent(weights=weights + noise)
+        score = agent.run_agent(render=render)
+        print("{} - score: {}".format(i, score))
 
 
 def interpolate(initial_agent, final_agent, objective, n_steps):
@@ -76,7 +98,7 @@ def execute_agent_multiple_times(weights, agent, n_times=5):
     return np.mean(scores)
 
 
-def distances_gen(weights):
+def compute_distance_generations(weights):
     """
     We calculate the distances from the average of the weights (as a vector without considering bias) for each generation,
     distances are calculated between consecutive generations and for each generation from the first one (initialization).
@@ -95,11 +117,26 @@ def distances_gen(weights):
     consecutive_dist = []
     dist_from_init = []
     for first, second in zip(flattened_mean_weights, flattened_mean_weights[1:]):
-        consecutive_dist.append(scipy.spatial.distance.euclidean(first, second))
+        consecutive_dist.append(euclidean(first, second))
     for i, _ in enumerate(flattened_mean_weights):
-        dist_from_init.append(scipy.spatial.distance.euclidean(flattened_mean_weights[0], flattened_mean_weights[i]))
+        dist_from_init.append(euclidean(flattened_mean_weights[0], flattened_mean_weights[i]))
 
     return consecutive_dist, dist_from_init
+
+
+def compute_distance_episodes(w0, w_t, w_t_new):
+    """
+
+    :param w0:
+    :param w_t:
+    :param w_t_new:
+    :return:
+    """
+
+    distance_consecutive = euclidean(w_t.ravel(), w_t_new.ravel())
+    distance_from_initial = euclidean(w0.ravel(), w_t_new.ravel())
+
+    return distance_consecutive, distance_from_initial
 
 
 def compute_second_derivative(i1, i2, loss_f, point, epsilon):
@@ -293,7 +330,7 @@ if __name__ == '__main__':
     print("threshold along v1 and v2")
     print(alphas[t1], alphas[t2])
 
-    consecutive_dist, dist_init = distances_gen(agents_weights)
+    consecutive_dist, dist_init = compute_distance_generations(agents_weights)
 
     plt.plot(alphas, s1, 'r', label='reward function along eigenvector 1')
     plt.plot(alphas, np.ones(alphas.shape)*threshold, 'b', label='epsilon threshold')

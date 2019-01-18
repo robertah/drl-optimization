@@ -2,25 +2,19 @@ import os
 
 
 class GeneticAlgorithmConfig:
-    def __init__(self, config):
+    def __init__(self, config, models_path):
         ga = config['genetic_algorithm']
-        self.selected = ga['perc_selected']
-        self.mutation_rate = ga['mutation_rate']
-        self.mutation_noise = ga['mutation_noise']
+        self.best = ga['best']
         self.elite = ga['elite']
+        self.noise_prob = ga['noise_prob']
+        self.models_path = os.path.join(models_path, ga['path'])
 
 
 class CMAEvolutionStrategiesConfig:
-    def __init__(self, config):
+    def __init__(self, config, models_path):
         cma_es = config['cma_evolution_strategies']
         self.perc_selected = cma_es['perc_selected']
-
-
-class EvolutionStrategiesConfig:
-    def __init__(self, config):
-        es = config['evolution_strategies']
-        self.learning_rate = es['learning_rate']
-        self.noise = es['noise']
+        self.models_path = os.path.join(models_path, cma_es['path'])
 
 
 class DDPGConfig:
@@ -54,5 +48,6 @@ class TD3Config:
         self.actor_lr = td3['actor_lr']
         self.critic_lr = td3['critic_lr']
         self.models_path = os.path.join(models_path, td3['path'])
+        self.save_every = td3['save_results_every']
 
 

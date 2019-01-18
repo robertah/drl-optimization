@@ -1,7 +1,7 @@
 # CONFIGURATION FILE
 # it contains environments, model settings, and algorithm's parameters used.
 
-random_seed: 42
+random_seed:
 
 ##############################################################################
 #  ENVIRONMENT        #  CartPole-v1          #  BipedalWalker-v2            #
@@ -32,7 +32,7 @@ ddpg:
   path: 'ddpg'
 
 td3:
-  n_episodes: 5000
+  n_episodes: 2000
   batch_size: 32
   buffer_size: 1000000
   buffer_size_warmup: 10000
@@ -42,7 +42,8 @@ td3:
   sigma_tilda: 0.1
   noise_cap: 0.1
   train_interval: 2
-  test_every: 10
+  test_every: 50
+  save_results_every: 10
   record_videos: 100
   actor_lr: 0.0001
   critic_lr: 0.0002
@@ -57,25 +58,20 @@ population:
   n_runs_per_agent: 3
 
 genetic_algorithm:
-  perc_selected: 0.25
-  mutation_rate: 0.2
-  mutation_noise: 1
-  elite: 3
-  path: 'genetic'
-
-evolution_strategies:
-  learning_rate: 0.01
-  noise: 0.01
+  best: 5
+  elite: 2
+  noise_prob: 0.7
+  path: 'ga'
 
 cma_evolution_strategies:
   perc_selected: 0.25
-  path: 'cma_evolution_strategies'
+  path: 'cma_es'
 
 results:
   path: 'results'
+  training: 'training'
   scores: 'scores'
   weights: 'weights'
-  training: 'training'
 
 visualization:
   path: 'visualization'
