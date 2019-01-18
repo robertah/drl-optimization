@@ -12,6 +12,8 @@
 | **Gradient-free optimization**  |   genetic       |   genetic            |
 
 
+![bipedal_td3](/results/bipedalwalker_td3/agent.gif)
+
 ***
 
 ## Getting started
