@@ -59,7 +59,6 @@ class Agent:
             try:
 
                 for i in range(td3_cfg.n_episodes):
-                    print("episode", i)
                     s = env.reset()
                     ep_reward = 0
                     ep_steps = 0
@@ -99,7 +98,6 @@ class Agent:
                         if done:
                             count = i + 1
                             rewards.append(ep_reward)
-                            print('count', count)
 
                             weights = get_actor_weights(sess)
                             for iw, w in enumerate(weights):
