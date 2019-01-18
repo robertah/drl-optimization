@@ -19,11 +19,16 @@ class Agent:
         self.agent = None
 
     def train(self):
-        """Train."""
+        """
+        Train BipedaWaker-v2 agent
 
-        # log_dir = os.path.join(config.job_dir, 'log')
+        :return:
+        """
 
+        # get start timestamp
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+
+        # saving paths
         model_path = os.path.join(td3_cfg.models_path, '{}-{}'.format(env_cfg.name, timestamp), 'model.ckpt')
         results_path = os.path.join(td3_cfg.models_path, '{}-{}'.format(env_cfg.name, timestamp), 'results.npy')
         distances_path = os.path.join(td3_cfg.models_path, '{}-{}'.format(env_cfg.name, timestamp), 'distances.npy')
@@ -31,24 +36,26 @@ class Agent:
                                     'weights_init_fin.npy')
         video_dir = os.path.join(td3_cfg.models_path, '{}-{}'.format(env_cfg.name, timestamp), 'video')
 
+        # read environment information from config
         env = env_cfg.env
 
+        # record video every 100 episodes
         if td3_cfg.record_videos:
             env = wrappers.Monitor(env, video_dir, video_callable=lambda ep: ep % td3_cfg.record_videos == 0)
 
+        # arrays with rewards, distances for later optimality analysis
         rewards = []
         distances_consecutive = np.zeros(2, dtype=np.ndarray)
         distances_init = np.zeros(2, dtype=np.ndarray)
 
         with tf.Session() as sess:
 
-            self.agent = TD3(sess)
+            # initialization
 
+            self.agent = TD3(sess)
             saver = tf.train.Saver()
-            # tf.logging.info('Start to train {} ...'.format(config.agent))
             init = tf.global_variables_initializer()
             sess.run(init)
-            # writer = tf.summary.FileWriter(log_dir, sess.graph)
 
             self.agent.initialize()
             global_step = 0
@@ -59,7 +66,8 @@ class Agent:
             try:
 
                 for i in range(td3_cfg.n_episodes):
-                    s = env.reset()
+
+                    s = env.reset()  # get initial state
                     ep_reward = 0
                     ep_steps = 0
                     noises = []
@@ -82,12 +90,15 @@ class Agent:
                         ep_reward += r
                         ep_steps += 1
                         global_step += 1
+
+                        # store transition in replay buffer
                         self.agent.store_experience(s, action, r, done, s2)
 
-                        flipped_s = reverse_obs(s)
-                        flipped_s2 = reverse_obs(s2)
+
+                        mirrored_s = reverse_obs(s)
+                        mirrored_s2 = reverse_obs(s2)
                         flipped_a = reverse_act(action)
-                        self.agent.store_experience(flipped_s, flipped_a, r, done, flipped_s2)
+                        self.agent.store_experience(mirrored_s, flipped_a, r, done, mirrored_s2)
 
                         temp = self.agent.train(global_step)
                         if temp:
@@ -97,7 +108,6 @@ class Agent:
 
                         if done:
                             count = i + 1
-                            rewards.append(ep_reward)
 
                             weights = get_actor_weights(sess)
                             for iw, w in enumerate(weights):
@@ -111,6 +121,7 @@ class Agent:
                                 print(
                                     "Episode: {:<10d} Evaluation Reward: {:<+10.3f}  "
                                     "Total Training Steps: {:10d}".format(count, eval_ep_reward, global_step))
+                                rewards.append(eval_ep_reward)
                             if count % td3_cfg.save_every == 0:
                                 saver.save(sess, model_path, global_step=count)
                                 np.save(results_path, rewards)
@@ -147,7 +158,7 @@ class Agent:
         done = False
 
         while not done:
-            if ep_steps < 5:
+            if ep_steps < 10:
                 action = self.agent.random_action()
             else:
                 action = self.agent.action(s)
@@ -158,24 +169,26 @@ class Agent:
         return ep_reward, ep_steps
 
 
-def reverse_obs(states):
+def reverse_obs(state):
     """
+    Mirror state (leg 1 and leg 2)
 
-    :param states:
-    :return:
+    :param state: current state
+    :return: mirrored state
     """
-    mirror_states = deepcopy(states)
-    tmp = deepcopy(mirror_states[4:9])
-    mirror_states[4:9] = mirror_states[9:14]
-    mirror_states[9:14] = tmp
-    return mirror_states
+    mirror_state = deepcopy(state)
+    tmp = deepcopy(mirror_state[4:9])
+    mirror_state[4:9] = mirror_state[9:14]
+    mirror_state[9:14] = tmp
+    return mirror_state
 
 
 def reverse_act(action):
     """
+    Mirror actions (leg 1 and leg 2)
 
-    :param action:
-    :return:
+    :param action: current action
+    :return: mirrored action
     """
     mirror_actions = deepcopy(action)
     tmp = deepcopy(mirror_actions[:2])
@@ -185,6 +198,12 @@ def reverse_act(action):
 
 
 def get_actor_weights(session):
+    """
+    Evaluate weights variables of the two hidden layers
+
+    :param session: tensorflow senssion
+    :return: hidden layers' weights
+    """
     with tf.variable_scope("actor/actor_hidden1", reuse=True):
         w1 = tf.get_variable("kernel")
     with tf.variable_scope("actor/actor_hidden2", reuse=True):

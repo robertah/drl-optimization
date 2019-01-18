@@ -42,7 +42,7 @@ td3:
   sigma_tilda: 0.05
   noise_cap: 0.15
   train_interval: 2
-  test_every: 50
+  test_every: 20
   save_results_every: 10
   record_videos: 100
   actor_lr: 0.0001
