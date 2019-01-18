@@ -50,26 +50,27 @@ The analysis of the different DRL optimization algorithms can be found in `noteb
 ## Project directory
 ``` bash
 .
-├── config.yml         # configuration file
+├── config.yml                # configuration file
 ├── src
-│   ├── config         # configuration loading package
-│   ├── A2C            # A2C package
-│   ├── DDPG           # Deep Deterministic Policy Gradients package
-│   ├── TD3            # TD3 package
-│   ├── GA             # Genetic Algorithm package
-│   ├── CMA_ES         # Covariance Matrix Adapatation ES package
-│   └── population     # population package for evolutionary algorithms
-├── main.py            # main 
-├── optimizers.py      # base gradient-free optimizer
-├── visualization.py   # visualization for analysis 
-├── utils.py           # helper functions
-├── notebooks          # notebooks with results analysis
-├── results            # folder containing results after training
+│   ├── config                # configuration loading package
+│   ├── A2C                   # A2C package
+│   ├── DDPG                  # Deep Deterministic Policy Gradients package
+│   ├── TD3                   # TD3 package
+│   ├── GA                    # Genetic Algorithm package
+│   ├── CMA_ES                # Covariance Matrix Adapatation ES package
+│   ├── population            # population package for evolutionary algorithms
+│   ├── main.py               # main 
+│   ├── optimizers.py         # base gradient-free optimizer
+│   ├── loss_analysis.py      # functions for loss analysis 
+│   ├── visualization.py      # visualization for analysis 
+│   └── utils.py              # helper functions
+├── notebooks                 # notebooks with results analysis
+├── results                   # folder containing results after training
 │   ├── scores
 │   └── weights
-├── runs.yml           # runs log file
-└── requirements.txt   # list of all packages used
+├── runs.yml                  # runs log file
+└── requirements.txt          # list of all packages used
 
 ```
 
-**Note**: the code has been tested on the following machines: macOS and Ubuntu computers, Leonhard cluster and Google Cloud Platform virtual machine.
+**Note**: the code has been tested on the following machines: macOS and Ubuntu computers, Google Cloud Platform virtual machine, and partially on ETH Leonhard cluster.
