@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-
+import os
 
 class Actor:
 
@@ -37,17 +37,22 @@ class Actor:
 
     def create_actor_network(self):
         s_inputs = tf.placeholder(dtype=tf.float32, shape=[None, self.s_dim])
-        # x = tf.layers.dense(inputs=s_inputs, units=512, activation=tf.nn.relu)
-        # x = tf.layers.dense(inputs=x, units=256, activation=tf.nn.relu)
-        x = tf.layers.dense(inputs=s_inputs, units=128, activation=tf.nn.tanh)
-        x = tf.layers.dense(inputs=x, units=128, activation=tf.nn.tanh)
-        x = tf.layers.dense(inputs=x, units=32, activation=tf.nn.tanh)
+        x = tf.layers.dense(inputs=s_inputs, units=512, activation=tf.nn.tanh, name="actor_hidden1")
+        x = tf.layers.dense(inputs=x, units=256, activation=tf.nn.tanh, name="actor_hidden2")
+        # x = tf.layers.dense(inputs=s_inputs, units=128, activation=tf.nn.tanh)
+        # x = tf.layers.dense(inputs=x, units=128, activation=tf.nn.tanh)
+        # x = tf.layers.dense(inputs=x, units=32, activation=tf.nn.tanh)
         actions = tf.layers.dense(inputs=x, units=self.a_dim, activation=tf.nn.tanh)
         scaled_actions = actions * (self.a_high - self.a_low) + self.a_low
         return s_inputs, scaled_actions
 
     def train(self, obs, a_gradient):
         self.sess.run(self.train_op, feed_dict={self.obs: obs, self.action_gradient: a_gradient})
+        with tf.variable_scope("actor/actor_hidden1", reuse=True):
+            w1 = tf.get_variable("kernel")
+        with tf.variable_scope("actor/actor_hidden2", reuse=True):
+            w2 = tf.get_variable("kernel")
+        return w1, w2
 
     def get_action(self, obs):
         if np.ndim(obs) == 1:
@@ -101,11 +106,11 @@ class Critic:
         s_inputs = tf.placeholder(dtype=tf.float32, shape=[None, self.s_dim])
         a_inputs = tf.placeholder(dtype=tf.float32, shape=[None, self.a_dim])
         inputs = tf.concat(values=[s_inputs, a_inputs], axis=1)
-        # x = tf.layers.dense(inputs=inputs, units=512, activation=tf.nn.relu)
-        # x = tf.layers.dense(inputs=x, units=256, activation=tf.nn.relu)
-        x = tf.layers.dense(inputs=inputs, units=128, activation=tf.nn.relu)
-        x = tf.layers.dense(inputs=x, units=128, activation=tf.nn.relu)
-        x = tf.layers.dense(inputs=x, units=32, activation=tf.nn.relu)
+        x = tf.layers.dense(inputs=inputs, units=512, activation=tf.nn.relu)
+        x = tf.layers.dense(inputs=x, units=256, activation=tf.nn.relu)
+        # x = tf.layers.dense(inputs=inputs, units=128, activation=tf.nn.relu)
+        # x = tf.layers.dense(inputs=x, units=128, activation=tf.nn.relu)
+        # x = tf.layers.dense(inputs=x, units=32, activation=tf.nn.relu)
         q_value = tf.squeeze(tf.layers.dense(inputs=x, units=1))
         return s_inputs, a_inputs, q_value
 

@@ -79,8 +79,10 @@ class TD3():
             if global_step % self.train_interval == 0:
                 actions = self.actor.get_action(s0)
                 grads = self.critic1.get_action_gradients(s0, actions)
-                self.actor.train(s0, grads[0])
+                w = self.actor.train(s0, grads[0])
                 self.update_targets()
+                return w
+        return None
 
     def update_targets(self):
         """Update all target networks."""

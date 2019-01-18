@@ -48,5 +48,6 @@ class TD3Config:
         self.actor_lr = td3['actor_lr']
         self.critic_lr = td3['critic_lr']
         self.models_path = os.path.join(models_path, td3['path'])
+        self.save_every = td3['save_results_every']
 
 

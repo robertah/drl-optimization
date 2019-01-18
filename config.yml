@@ -32,7 +32,7 @@ ddpg:
   path: 'ddpg'
 
 td3:
-  n_episodes: 3000
+  n_episodes: 2000
   batch_size: 32
   buffer_size: 1000000
   buffer_size_warmup: 10000
@@ -43,6 +43,7 @@ td3:
   noise_cap: 0.1
   train_interval: 2
   test_every: 50
+  save_results_every: 10
   record_videos: 100
   actor_lr: 0.0001
   critic_lr: 0.0002
