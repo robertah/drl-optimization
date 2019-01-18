@@ -1,6 +1,5 @@
 import numpy as np
 import sys
-from .agent import Agent
 from math import exp
 
 

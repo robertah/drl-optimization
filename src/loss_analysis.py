@@ -2,6 +2,7 @@ import numpy as np
 import scipy
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+from population import Agent
 from matplotlib import cm
 
 
@@ -36,7 +37,7 @@ def interpolate(initial_agent, final_agent, objective, n_steps):
 
     new_weights = weighted_initial_weights + weighted_final_weights
     # we need a random agent
-    agent = Agent(environment_config=initial_agent.env)
+    agent = Agent()
     objective_values = np.apply_along_axis(lambda row: objective(row, agent), axis=1, arr=new_weights)
 
     return objective_values, alphas
@@ -211,10 +212,8 @@ def compute_epsilon_threshold(scores, epsilon=0.70, n_steps=80):
     scores = np.reshape(scores, (n_steps, n_steps))
     maximum = scores[max_index, max_index]
     threshold = maximum * epsilon
-    print("maximum: ", maximum)
     s2 = scores[max_index, :]
     i = 0
-    print(s2)
     for i,_ in enumerate(s2.tolist()):
         s = s2[max_index + i]
         if s <= threshold:
@@ -227,19 +226,15 @@ def compute_epsilon_threshold(scores, epsilon=0.70, n_steps=80):
 
     s1 = scores[:, max_index]
     j = 0
-    print(s1)
     for j, _ in enumerate(s1.tolist()):
         s_ = s1[max_index + j]
         if s_ <= threshold:
-            print("exit", s_)
             j = max_index + j
             break
         s_ = s1[max_index - j]
         if s_ <= threshold:
-            print("exit", s_)
             j = max_index - j
             break
-    print(j, i)
     return j, i, s1, s2, threshold
 
 
@@ -275,25 +270,22 @@ def plot_reward_along_eigenvectors(final_agent, n_times=2, file="hessian", from_
 
     v1, v2 = get_top_eigenvector(h)
     scores, alphas = evaluate_in_neighborhood(run_agent_multiple_times, final_weights, v1, v2, n_steps=80)
-    print(scores.shape)
     plot_surface_3d(alphas, alphas, scores)
     return v1,v2, scores, alphas
 
 
 if __name__ == '__main__':
-    from GA import run_agent_genetic
-    from GA.agent import Agent
-    from config import ENVIRONMENT
+    from GA import run_agent_es
     import matplotlib.pyplot as plt
     import os
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
-    agents_weights, scores, children = run_agent_genetic(n_agents=20, n_generations=50)
+    agents_weights, scores, children = run_agent_es(n_agents=20, n_generations=50)
 
-    initial_agent = Agent(ENVIRONMENT, weights=children[0])
-    final_agent = Agent(ENVIRONMENT, weights=children[-1])
-    final_agent_copy = Agent(ENVIRONMENT, weights=children[-1])
+    initial_agent = Agent(weights=children[0])
+    final_agent = Agent(weights=children[-1])
+    final_agent_copy = Agent(weights=children[-1])
     v1, v2, all_scores, alphas = plot_reward_along_eigenvectors(final_agent, from_file=True)
     t1, t2, s1, s2, threshold = compute_epsilon_threshold(all_scores)
     #print(v1,v2)
