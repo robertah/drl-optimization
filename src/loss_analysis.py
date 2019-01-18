@@ -363,8 +363,8 @@ if __name__ == '__main__':
     plt.title('Linear interpolation initial and final agent')
     plt.show()
 
-    plt.plot([x / max(consecutive_dist) for x in consecutive_dist], 'r', label='Dist consecutive gen')
-    plt.plot([x / max(dist_init) for x in dist_init], 'b', label='Dist from init')
+    plt.plot([x for x in consecutive_dist], 'r', label='Dist consecutive gen')
+    plt.plot([x for x in dist_init], 'b', label='Dist from init')
     plt.ylabel('Distance')
     plt.xlabel('Generation')
     plt.grid(True)
