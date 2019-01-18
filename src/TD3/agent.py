@@ -79,9 +79,9 @@ class Agent:
                         env.render()
 
                         if ep_steps < 10:
-                            action = self.agent.random_action()
+                            action = self.agent.get_random_action()
                         else:
-                            action, action_org, noise = self.agent.action_with_noise(s)
+                            action, action_org, noise = self.agent.get_noisy_action(s)
                             noises.append(noise)
                             actions.append(action_org)
                         action = action.squeeze()
@@ -94,12 +94,13 @@ class Agent:
                         # store transition in replay buffer
                         self.agent.store_experience(s, action, r, done, s2)
 
+                        # use symmetry of leg 1 and leg 2
+                        mirrored_s = mirror_state(s)
+                        mirrored_s2 = mirror_state(s2)
+                        mirrored_a = mirror_action(action)
+                        self.agent.store_experience(mirrored_s, mirrored_a, r, done, mirrored_s2)
 
-                        mirrored_s = reverse_obs(s)
-                        mirrored_s2 = reverse_obs(s2)
-                        flipped_a = reverse_act(action)
-                        self.agent.store_experience(mirrored_s, flipped_a, r, done, mirrored_s2)
-
+                        # train agent
                         temp = self.agent.train(global_step)
                         if temp:
                             weights = temp
@@ -107,29 +108,36 @@ class Agent:
                         s = s2
 
                         if done:
+                            # end of the episode
                             count = i + 1
 
+                            # get trained weights
                             weights = get_actor_weights(sess)
                             for iw, w in enumerate(weights):
+                                # compute the distances with the previous weights and the initial weights
                                 con, init = compute_distance_episodes(weights_init[iw], weights_old[iw], weights[iw])
                                 distances_consecutive[iw] = np.append(distances_consecutive[iw], con)
                                 distances_init[iw] = np.append(distances_init[iw], init)
                             weights_old = weights
 
+                            # evaluation
                             if count % td3_cfg.test_every == 0:
                                 eval_ep_reward, eval_ep_steps = self.evaluate(env)
                                 print(
                                     "Episode: {:<10d} Evaluation Reward: {:<+10.3f}  "
                                     "Total Training Steps: {:10d}".format(count, eval_ep_reward, global_step))
                                 rewards.append(eval_ep_reward)
+
+                            # saving
                             if count % td3_cfg.save_every == 0:
                                 saver.save(sess, model_path, global_step=count)
                                 np.save(results_path, rewards)
                                 np.save(distances_path, np.vstack((distances_consecutive, distances_init)))
                                 np.save(weights_path, np.append(weights_init, weights))
-            except KeyboardInterrupt as e:
+            except KeyboardInterrupt:
                 print("Training interrupted.")
 
+            # Finalize training and save results
             print('Total steps:', global_step)
             print("Saving results...")
             LOGGER.log(environment=env_cfg.name,
@@ -137,7 +145,7 @@ class Agent:
                        algorithm=self.agent.__class__.__name__,
                        parameters=vars(td3_cfg),
                        total_steps=global_step,
-                       score=ep_reward)
+                       score=eval_ep_reward)
             saver.save(sess, model_path, global_step=count)
             np.save(results_path, rewards)
             np.save(distances_path, np.vstack((distances_consecutive, distances_init)))
@@ -147,21 +155,22 @@ class Agent:
 
     def evaluate(self, env):
         """
+        Evaluate agent
 
-        :param env:
+        :param env: gym environment
         :return:
         """
-        tf.logging.info('Testing ...')
+
         s = env.reset()
         ep_reward = 0
         ep_steps = 0
         done = False
 
         while not done:
-            if ep_steps < 10:
-                action = self.agent.random_action()
+            if ep_steps < 10:  # get random actions at the beginning
+                action = self.agent.get_random_action()
             else:
-                action = self.agent.action(s)
+                action = self.agent.get_action(s)
             s2, r, done, info = env.step(action.squeeze().tolist())
             ep_reward += r
             ep_steps += 1
@@ -169,7 +178,7 @@ class Agent:
         return ep_reward, ep_steps
 
 
-def reverse_obs(state):
+def mirror_state(state):
     """
     Mirror state (leg 1 and leg 2)
 
@@ -183,7 +192,7 @@ def reverse_obs(state):
     return mirror_state
 
 
-def reverse_act(action):
+def mirror_action(action):
     """
     Mirror actions (leg 1 and leg 2)
 
