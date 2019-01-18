@@ -112,7 +112,6 @@ class Agent:
                                     "Episode: {:<10d} Evaluation Reward: {:<+10.3f}  "
                                     "Total Training Steps: {:10d}".format(count, eval_ep_reward, global_step))
                             if count % td3_cfg.save_every == 0:
-                                print("Saving results...")
                                 saver.save(sess, model_path, global_step=count)
                                 np.save(results_path, rewards)
                                 np.save(distances_path, np.vstack((distances_consecutive, distances_init)))

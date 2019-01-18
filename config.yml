@@ -33,14 +33,14 @@ ddpg:
 
 td3:
   n_episodes: 2000
-  batch_size: 32
+  batch_size: 64
   buffer_size: 1000000
   buffer_size_warmup: 10000
   gamma: 0.99
-  tau: 0.001
+  tau: 0.002
   sigma: 0.5
   sigma_tilda: 0.1
-  noise_cap: 0.1
+  noise_cap: 0.3
   train_interval: 2
   test_every: 50
   save_results_every: 10

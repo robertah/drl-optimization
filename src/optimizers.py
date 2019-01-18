@@ -64,8 +64,7 @@ class EvolutionaryOptimizers(ABC):
         agents = population.create_population()
 
         for i in range(population.max_generations):
-            # if not self.terminate(population, i):
-            if True:
+            if not self.terminate(population, i):
                 try:
                     population.agents_weights[i] = np.array([a.model.get_weights() for a in agents], dtype=np.ndarray)
 
