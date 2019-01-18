@@ -12,7 +12,7 @@ class Actor:
         self.a_high = action_high
         self.a_low = action_low
         self.learning_rate = learning_rate
-        self.grad_norm_clip = 3
+        self.grad_norm_clip = 5
         self.tau = tau
         self.batch_size = batch_size
 
@@ -37,8 +37,8 @@ class Actor:
 
     def create_actor_network(self):
         s_inputs = tf.placeholder(dtype=tf.float32, shape=[None, self.s_dim])
-        x = tf.layers.dense(inputs=s_inputs, units=512, activation=tf.nn.relu, name="actor_hidden1")
-        x = tf.layers.dense(inputs=x, units=256, activation=tf.nn.relu, name="actor_hidden2")
+        x = tf.layers.dense(inputs=s_inputs, units=512, activation=tf.nn.tanh, name="actor_hidden1")
+        x = tf.layers.dense(inputs=x, units=256, activation=tf.nn.tanh, name="actor_hidden2")
         # x = tf.layers.dense(inputs=s_inputs, units=128, activation=tf.nn.tanh)
         # x = tf.layers.dense(inputs=x, units=128, activation=tf.nn.tanh)
         # x = tf.layers.dense(inputs=x, units=32, activation=tf.nn.tanh)

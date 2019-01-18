@@ -70,7 +70,7 @@ class Agent:
 
                         env.render()
 
-                        if ep_steps < 5:
+                        if ep_steps < 10:
                             action = self.agent.random_action()
                         else:
                             action, action_org, noise = self.agent.action_with_noise(s)
