@@ -6,11 +6,15 @@ from matplotlib import cm
 from matplotlib.animation import FuncAnimation
 from matplotlib.colors import Normalize
 from sklearn.decomposition import PCA
+import matplotlib
 
 from config import ENVIRONMENT, VISUALIZATION_WEIGHTS
 
-figsize = (18, 10)
-fontsize = 15
+plt.rcParams['figure.figsize'] = [12, 8]
+font = {'family': 'serif',
+        'weight': 'normal',
+        'size': 16}
+matplotlib.rc('font', **font)
 
 
 def plot_weights_mean(weights, title="Weights Mean over Generations", xlabel="Generations", ylabel="Weights Mean"):

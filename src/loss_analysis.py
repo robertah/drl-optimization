@@ -4,8 +4,14 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from population import Agent
 from matplotlib import cm
-
+import matplotlib
 from scipy.spatial.distance import euclidean
+
+plt.rcParams['figure.figsize'] = [12, 8]
+font = {'family': 'serif',
+        'weight': 'normal',
+        'size': 16}
+matplotlib.rc('font', **font)
 
 
 def perturbate_weights(weights, n=5, noise_scale=1, render=False):
