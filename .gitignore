@@ -118,3 +118,5 @@ results/saved_models/td3/*
 !CartPole-v1-20190103183514.npy
 !agent.gif
 !hessian.npy
+
+!results/training/td3/BipedalWalker-v2-20190118192711/*

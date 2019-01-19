@@ -3,10 +3,12 @@ import numpy as np
 
 from optimizers import EvolutionaryOptimizers
 
+from config import GA
+
 
 class GeneticAlgorithm(EvolutionaryOptimizers):
 
-    def __init__(self, best, elite, noise_prob=0.7):
+    def __init__(self):
         """
 
         :param best: number of best agents to be picked from previous generation as parents for the next one
@@ -18,9 +20,9 @@ class GeneticAlgorithm(EvolutionaryOptimizers):
         :type noise_prob: float
         """
 
-        self.best = best
-        self.elite = elite
-        self.noise_prob = noise_prob
+        self.best = GA.best
+        self.elite = GA.elite
+        self.noise_prob = GA.noise_prob
         super(GeneticAlgorithm, self).__init__()
 
     def generate_next_generation(self, population, generation):

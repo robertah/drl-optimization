@@ -6,15 +6,15 @@ random_seed:
 ##############################################################################
 #  ENVIRONMENT        #  CartPole-v1          #  BipedalWalker-v2            #
 #---------------------#-----------------------#------------------------------#
-#  Gradient-based     #  Q Learning           #  TD3 (Twin Delayed DDPG)     #
+#  Gradient-based     #  DQN                  #  TD3 (Twin Delayed DDPG)     #
 #  Gradient-free      #  Genetic Algorithm    #  Genetic Algorithm           #
 ##############################################################################
 
 environment:
-  name: 'BipedalWalker-v2'   # 'CartPole-v1' or 'BipedalWalker-v2'
+  name: 'CartPole-v1'   # 'CartPole-v1' or 'BipedalWalker-v2'
   animate: False
 
-algorithm: 'td3'        # 'q_learning' or 'td3' or 'ga'
+algorithm: 'ga'        # 'dqn' or 'td3' or 'ga'
 
 
 ###############################################################################
@@ -54,7 +54,7 @@ td3:
 population:
   size: 50
   max_generations: 200
-  n_runs_per_agent: 3
+  n_runs_per_agent: 1
 
 genetic_algorithm:
   best: 5

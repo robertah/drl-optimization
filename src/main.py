@@ -4,8 +4,11 @@ import numpy as np
 import tensorflow as tf
 
 from GA import GeneticAlgorithm
-from config import GA, RANDOM_SEED
+from ES import EvolutionStrategies
+from config import RANDOM_SEED, ENVIRONMENT, ALGORITHM
 from population import Population
+import DQN
+import TD3
 
 if RANDOM_SEED:
     np.random.seed(RANDOM_SEED)
@@ -15,30 +18,31 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 
-# agents_weights, scores, children = run_agent_genetic(n_agents=50, n_generations=20, save=True)
+if 'CartPole' in ENVIRONMENT.name:
+    if 'dqn' in ALGORITHM:
+        DQN.train()
+    elif 'ga' in ALGORITHM:
+        ga = GeneticAlgorithm()
+        agents = Population(optimizer=ga)
+        agents.evolve(save=True)
+    elif 'es' in ALGORITHM:
+        es = EvolutionStrategies()
+        agents = Population(optimizer=es)
+        agents.evolve(save=True)
+    else:
+        print("Please, check that configurations are set correctly.")
 
+elif 'BipedalWalker' in ENVIRONMENT.name:
+    if 'td3' in ALGORITHM:
+        agent = TD3.Agent()
+        agent.train()
+    elif 'ga' in ALGORITHM:
+        ga = GeneticAlgorithm()
+        agents = Population(optimizer=ga)
+        agents.evolve(save=True)
+    else:
+        print("Please, check that configurations are set correctly.")
+else:
+    print("Please, check that configurations are set correctly.")
 
-# weights = get_best_agent(mean=True, timestamp='20190103183514')
-# perturbate_weights(weights)
-# #
-# ga = GeneticAlgorithm(best=GA.best, elite=GA.elite, noise_prob=GA.noise_prob)
-#
-# agents = Population(optimizer=ga)
-# agents.evolve(save=True)
-
-
-# weights = utils.get_best_agent()
-
-# agent = Agent(ENVIRONMENT, weights)
-# score = agent.run_agent(render=True)
-# analysis.perturbate_weights(weights)
-
-
-#
-
-
-from TD3 import Agent
-
-agent = Agent()
-agent.train()
 
