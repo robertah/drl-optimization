@@ -344,17 +344,27 @@ if __name__ == '__main__':
     """
     Example of main in which the whole pipeline is computed and the graphs plotted
     """
-    from GA import run_agent_es
+    # from GA import run_agent_es
+    from ES import EvolutionStrategies
+    from population import Population
     import matplotlib.pyplot as plt
     import os
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
-    agents_weights, scores, children = run_agent_es(n_agents=20, n_generations=50)
+    # agents_weights, scores, children = run_agent_es(n_agents=20, n_generations=50)
 
-    initial_agent = Agent(weights=children[0])
-    final_agent = Agent(weights=children[-1])
-    final_agent_copy = Agent(weights=children[-1])
+    es = EvolutionStrategies()
+
+    agents = Population(optimizer=es)
+    agents_weights, scores = agents.evolve(save=True)
+
+    children_first = es.crossover(agents_weights[0], scores[0])
+    children_last = es.crossover(agents_weights[-1], scores[-1])
+
+    initial_agent = Agent(weights=children_first)
+    final_agent = Agent(weights=children_last)
+    final_agent_copy = Agent(weights=children_last)
     v1, v2, all_scores, alphas = plot_reward_along_eigenvectors(final_agent, file="Hessian_larger")
     t1, t2, s1, s2, threshold = compute_epsilon_threshold(all_scores)
     #print(v1,v2)
