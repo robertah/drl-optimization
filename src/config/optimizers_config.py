@@ -10,6 +10,13 @@ class GeneticAlgorithmConfig:
         self.models_path = os.path.join(models_path, ga['path'])
 
 
+class EvolutionStrategiesConfig:
+    def __init__(self, config, models_path):
+        es = config['evolution_strategies']
+        self.noise = es['noise']
+        self.models_path = os.path.join(models_path, es['path'])
+
+
 class CMAEvolutionStrategiesConfig:
     def __init__(self, config, models_path):
         cma_es = config['cma_evolution_strategies']

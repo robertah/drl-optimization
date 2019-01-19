@@ -33,6 +33,7 @@ TD3_Config = TD3Config(config, RESULTS_TRAINING)
 
 POPULATION = PopulationConfig(config)
 GA = GeneticAlgorithmConfig(config, RESULTS_TRAINING)
+ES = EvolutionStrategiesConfig(config, RESULTS_TRAINING)
 CMA_ES = CMAEvolutionStrategiesConfig(config, RESULTS_TRAINING)
 
 
