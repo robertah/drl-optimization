@@ -7,7 +7,7 @@ from GA import GeneticAlgorithm
 from ES import EvolutionStrategies
 from config import RANDOM_SEED, ENVIRONMENT, ALGORITHM
 from population import Population
-
+import DQN
 import TD3
 
 if RANDOM_SEED:
@@ -20,7 +20,7 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 if 'CartPole' in ENVIRONMENT.name:
     if 'dqn' in ALGORITHM:
-        pass
+        DQN.train()
     elif 'ga' in ALGORITHM:
         ga = GeneticAlgorithm()
         agents = Population(optimizer=ga)

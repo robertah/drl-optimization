@@ -397,7 +397,7 @@ if __name__ == '__main__':
     # plt.show()
 
     plot_reward_along_eingenvector(alphas, t2, s2, threshold,
-                                   title="Function along eigenvector relative to largest eigenvalue")
+                                   title="Function along eigenvector relative to second largest eigenvalue")
 
     print("interpolating")
     inter_results, alphas = interpolate(initial_agent, final_agent_copy, execute_agent_multiple_times, n_steps=80)

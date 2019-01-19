@@ -148,7 +148,6 @@ def plot_scores_episodes(scores, title="Scores over episodes", file="scores.pdf"
 
     plt.title(title)
     plt.plot([i * 20 for i in range(0, len(scores))], scores)
-    plt.legend()
     plt.xlabel('Episodes')
     plt.ylabel('Scores')
     plt.savefig(file)
