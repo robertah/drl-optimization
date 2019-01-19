@@ -1,11 +1,8 @@
-import numpy as np
 # import scipy
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
-from population import Agent
-from matplotlib import cm
-import matplotlib
 from scipy.spatial.distance import euclidean
+
+from population import Agent
+from visualization import *
 
 plt.rcParams['figure.figsize'] = [12, 8]
 font = {'family': 'serif',
@@ -58,7 +55,7 @@ def interpolate(initial_agent, final_agent, objective, n_steps):
     final_weights = final_weights.reshape(1, final_weights.shape[0])
 
     # now each row has (1-alpha_i)w1, (1-alpha_i)w2 ...
-    weighted_initial_weights = np.dot((1-alphas), initial_weights)
+    weighted_initial_weights = np.dot((1 - alphas), initial_weights)
 
     # now each row has (alpha_i)w1, (alpha_i)w2 ...
     weighted_final_weights = np.dot(alphas, final_weights)
@@ -81,7 +78,7 @@ def from_agent_to_weights(agent):
     flattened_weights = []
     for layer in weights:
         if len(layer.shape) == 2:
-            layer = layer.reshape(layer.shape[0]*layer.shape[1],)
+            layer = layer.reshape(layer.shape[0] * layer.shape[1], )
         flattened_weights.extend(layer.tolist())
     return np.array(flattened_weights)
 
@@ -98,9 +95,9 @@ def from_weights_to_layers(weights, agent):
     new_layers = []
     for i, layer in enumerate(agent_weights):
         if len(layer.shape) == 2:
-            new_layer = weights[initial_point:(initial_point+(layer.shape[0]*layer.shape[1]))]
+            new_layer = weights[initial_point:(initial_point + (layer.shape[0] * layer.shape[1]))]
             new_layer = new_layer.reshape(layer.shape[0], layer.shape[1])
-            initial_point += layer.shape[0]*layer.shape[1]
+            initial_point += layer.shape[0] * layer.shape[1]
         else:
             new_layer = weights[initial_point:(initial_point + layer.shape[0])]
             initial_point += layer.shape[0]
@@ -124,13 +121,14 @@ def compute_distance_generations(weights):
         consecutive_dist: list, distances between generation
         dist_from_init: list, distances from initialization
     """
-    w_1 = np.mean(weights[:,:,0],1).tolist()
-    w_2 = np.mean(weights[:,:,2],1).tolist()
+    w_1 = np.mean(weights[:, :, 0], 1).tolist()
+    w_2 = np.mean(weights[:, :, 2], 1).tolist()
     flattened_mean_weights = []
     for i in range(len(w_1)):
         w_1[i].reshape(w_1[i].shape[0] * w_1[i].shape[1], )
         w_2[i].reshape(w_2[i].shape[0] * w_2[i].shape[1], )
-        flattened_mean_weights.append(w_1[i].reshape(w_1[i].shape[0] * w_1[i].shape[1], ).tolist() + w_2[i].reshape(w_2[i].shape[0] * w_2[i].shape[1], ).tolist() )
+        flattened_mean_weights.append(w_1[i].reshape(w_1[i].shape[0] * w_1[i].shape[1], ).tolist() + w_2[i].reshape(
+            w_2[i].shape[0] * w_2[i].shape[1], ).tolist())
     consecutive_dist = []
     dist_from_init = []
     for first, second in zip(flattened_mean_weights, flattened_mean_weights[1:]):
@@ -180,9 +178,9 @@ def compute_second_derivative(i1, i2, loss_f, point, epsilon):
     p3[i2] = p3[i2] - epsilon
     p4[i1] = point[i1] - epsilon
     p4[i2] = p4[i2] - epsilon
-    first_d1 = (loss_f(p1) - loss_f(p2))/(2*epsilon)
-    first_d2 = (loss_f(p3) - loss_f(p4))/(2*epsilon)
-    sec_deriv = (first_d1 - first_d2)/(2*epsilon)
+    first_d1 = (loss_f(p1) - loss_f(p2)) / (2 * epsilon)
+    first_d2 = (loss_f(p3) - loss_f(p4)) / (2 * epsilon)
+    sec_deriv = (first_d1 - first_d2) / (2 * epsilon)
     return sec_deriv
 
 
@@ -199,7 +197,7 @@ def compute_hessian(loss_f, point, epsilon=0.01, file=None):
     for i in range(point.shape[0]):
         for j in range(point.shape[0]):
             hessian[i][j] = compute_second_derivative(i, j, loss_f, point, epsilon)
-        print("finished row {}/{}".format(i+1, point.shape[0]))
+        print("finished row {}/{}".format(i + 1, point.shape[0]))
         if file is not None:
             np.save("temp", hessian)
     if file is not None:
@@ -253,11 +251,11 @@ def evaluate_in_neighborhood(f, weights, d1, d2, n_steps=20):
     alphas = np.linspace(-2.0, 2.0, n_steps)
     scores = []
     print("evaluating the neighborhood")
-    for i,a1 in enumerate(alphas.tolist()):
+    for i, a1 in enumerate(alphas.tolist()):
         for a2 in alphas.tolist():
-            score = f(weights + d1*a1 + d2*a2)
+            score = f(weights + d1 * a1 + d2 * a2)
             scores.append(score)
-        print("finished step {}/{}".format(i+1, alphas.shape[0]))
+        print("finished step {}/{}".format(i + 1, alphas.shape[0]))
     return np.array(scores), alphas
 
 
@@ -280,7 +278,7 @@ def compute_epsilon_threshold(scores, epsilon=0.70, n_steps=80):
     threshold = maximum * epsilon
     s2 = scores[max_index, :]
     i = 0
-    for i,_ in enumerate(s2.tolist()):
+    for i, _ in enumerate(s2.tolist()):
         s = s2[max_index + i]
         if s <= threshold:
             i = max_index + i
@@ -304,7 +302,7 @@ def compute_epsilon_threshold(scores, epsilon=0.70, n_steps=80):
     return j, i, s1, s2, threshold
 
 
-def plot_reward_along_eigenvectors(final_agent, n_times=2, file="hessian", from_file=False):
+def compute_reward_along_eigenvectors(final_agent, n_times=2, file="hessian", from_file=False):
     """
     Plots the reward function along the directions of maximum variation of the curvature. These
     directions are defined by the eigenvectors corresponding to the two largest eigenvalues of the hessian.
@@ -337,7 +335,7 @@ def plot_reward_along_eigenvectors(final_agent, n_times=2, file="hessian", from_
     v1, v2 = get_top_eigenvector(h)
     scores, alphas = evaluate_in_neighborhood(run_agent_multiple_times, final_weights, v1, v2, n_steps=80)
     plot_surface_3d(alphas, alphas, scores)
-    return v1,v2, scores, alphas
+    return v1, v2, scores, alphas
 
 
 if __name__ == '__main__':
@@ -349,6 +347,7 @@ if __name__ == '__main__':
     from population import Population
     import matplotlib.pyplot as plt
     import os
+
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
@@ -365,51 +364,62 @@ if __name__ == '__main__':
     initial_agent = Agent(weights=children_first)
     final_agent = Agent(weights=children_last)
     final_agent_copy = Agent(weights=children_last)
-    v1, v2, all_scores, alphas = plot_reward_along_eigenvectors(final_agent, file="Hessian_larger")
+    v1, v2, all_scores, alphas = compute_reward_along_eigenvectors(final_agent, file="Hessian_larger")
     t1, t2, s1, s2, threshold = compute_epsilon_threshold(all_scores)
-    #print(v1,v2)
+    # print(v1,v2)
 
     print("threshold along v1 and v2")
     print(alphas[t1], alphas[t2])
 
     consecutive_dist, dist_init = compute_distance_generations(agents_weights)
 
-    plt.plot(alphas, s1, 'r', label='reward function along eigenvector 1')
-    plt.plot(alphas, np.ones(alphas.shape)*threshold, 'b', label='epsilon threshold')
-    plt.vlines(alphas[t1], 0, threshold, linestyles='dashed', label="perturbation magnitude")
-    plt.ylabel('threshold: {}'.format(threshold))
-    #plt.xlabel('eps')
-    plt.grid(True)
-    plt.legend()
-    plt.title('function along eigenvector relative to largest eigenvalue')
-    plt.show()
+    # plt.plot(alphas, s1, 'r', label='reward function along eigenvector 1')
+    # plt.plot(alphas, np.ones(alphas.shape) * threshold, 'b', label='epsilon threshold')
+    # plt.vlines(alphas[t1], 0, threshold, linestyles='dashed', label="perturbation magnitude")
+    # plt.ylabel('threshold: {}'.format(threshold))
+    # # plt.xlabel('eps')
+    # plt.grid(True)
+    # plt.legend()
+    # plt.title('function along eigenvector relative to largest eigenvalue')
+    # plt.show()
 
-    plt.plot(alphas, s2, 'r', label='reward function along eigenvector 2')
-    plt.plot(alphas, np.ones(alphas.shape)*threshold, 'b', label='epsilon threshold')
-    plt.vlines(alphas[t2], 0, threshold, linestyles='dashed', label="perturbation magnitude")
-    plt.ylabel('threshold: {}'.format(threshold))
-    #plt.xlabel('eps')
-    plt.grid(True)
-    plt.legend()
-    plt.title('function along eigenvector relative to second largest eigenvalue')
-    plt.show()
+    plot_reward_along_eingenvector(alphas, t1, s1, threshold,
+                                   title="Function along eigenvector relative to largest eigenvalue")
+
+    # plt.plot(alphas, s2, 'r', label='reward function along eigenvector 2')
+    # plt.plot(alphas, np.ones(alphas.shape) * threshold, 'b', label='epsilon threshold')
+    # plt.vlines(alphas[t2], 0, threshold, linestyles='dashed', label="perturbation magnitude")
+    # plt.ylabel('threshold: {}'.format(threshold))
+    # # plt.xlabel('eps')
+    # plt.grid(True)
+    # plt.legend()
+    # plt.title('function along eigenvector relative to second largest eigenvalue')
+    # plt.show()
+
+    plot_reward_along_eingenvector(alphas, t2, s2, threshold,
+                                   title="Function along eigenvector relative to largest eigenvalue")
 
     print("interpolating")
     inter_results, alphas = interpolate(initial_agent, final_agent_copy, execute_agent_multiple_times, n_steps=80)
     np.save("interpolation_results", inter_results)
 
-    plt.scatter(alphas, inter_results)
-    plt.ylabel('Mean score')
-    plt.xlabel('Alpha')
-    plt.grid(True)
-    plt.title('Linear interpolation initial and final agent')
-    plt.show()
+    # plt.scatter(alphas, inter_results)
+    # plt.ylabel('Mean score')
+    # plt.xlabel('Alpha')
+    # plt.grid(True)
+    # plt.title('Linear interpolation initial and final agent')
+    # plt.show()
 
-    plt.plot([x for x in consecutive_dist], 'r', label='Dist consecutive gen')
-    plt.plot([x for x in dist_init], 'b', label='Dist from init')
-    plt.ylabel('Distance')
-    plt.xlabel('Generation')
-    plt.grid(True)
-    plt.legend()
-    plt.title('Distance of mean weights between generations ')
-    plt.show()
+    plot_interpolation(alphas, inter_results)
+
+    # plt.plot([x for x in consecutive_dist], 'r', label='Dist consecutive gen')
+    # plt.plot([x for x in dist_init], 'b', label='Dist from init')
+    # plt.ylabel('Distance')
+    # plt.xlabel('Generation')
+    # plt.grid(True)
+    # plt.legend()
+    # plt.title('Distance of mean weights between generations')
+    # plt.show()
+
+    plot_distances([x for x in consecutive_dist], [x for x in dist_init],
+                   title='Distance of mean weights between generations', x_label='Generation')
