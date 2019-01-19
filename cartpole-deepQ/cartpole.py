@@ -7,19 +7,20 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 
 
-from scores.score_logger import ScoreLogger
+ENV_NAME = "CartPole-v1"
 
-ENV_NAME = "LunarLander-v2"
-
-GAMMA = 0.99
+GAMMA = 0.995
 LEARNING_RATE = 0.001
 
 MEMORY_SIZE = 1000000
-BATCH_SIZE = 20
+BATCH_SIZE = 32
 
-EXPLORATION_MAX = 1.0
-EXPLORATION_MIN = 0.01
+EXPLORATION_MAX = 1
+EXPLORATION_MIN = 0.1
 EXPLORATION_DECAY = 0.995
+TARGET = 450
+RENDER = False
+NTIMES = 4 
 
 
 class DQNSolver:
@@ -36,9 +37,9 @@ class DQNSolver:
 
     def create_model(self):
         model = Sequential()
-        model.add(Dense(24, input_shape=(self.observation_space,), activation="relu"))
-        model.add(Dense(24, activation="relu"))
-        model.add(Dense(self.action_space, activation="linear"))
+        model.add(Dense(24, input_shape=(self.observation_space,), activation="relu" , kernel_initializer='he_uniform'))
+        #model.add(Dense(24, activation="relu"))
+        model.add(Dense(self.action_space, activation="linear", kernel_initializer='he_uniform'))
         model.compile(loss="mse", optimizer=Adam(lr=LEARNING_RATE))
         return model
 
@@ -49,7 +50,11 @@ class DQNSolver:
         if np.random.rand() < self.exploration_rate:
             return random.randrange(self.action_space)
         q_values = self.model.predict(state)
-        print(q_values[0])
+        return np.argmax(q_values[0])
+
+    #Action for evaluation has no exploration
+    def act_eval(self, state):
+        q_values = self.model.predict(state)
         return np.argmax(q_values[0])
 
     def experience_replay(self):
@@ -70,31 +75,73 @@ class DQNSolver:
 
 def cartpole():
     env = gym.make(ENV_NAME)
-    score_logger = ScoreLogger(ENV_NAME)
+    env._max_episode_steps = 500
     observation_space = env.observation_space.shape[0]
     action_space = env.action_space.n
     dqn_solver = DQNSolver(observation_space, action_space)
     run = 0
-    while True:
+    score = []
+    agents_weights = []
+    condition = True
+    while condition:
         run += 1
-        state = env.reset()
-        state = np.reshape(state, [1, observation_space])
-        step = 0
-        while True:
-            step += 1
-            env.render()
-            action = dqn_solver.act(state)
-            state_next, reward, terminal, info = env.step(action)
-            reward = reward if not terminal else -reward
-            state_next = np.reshape(state_next, [1, observation_space])
-            dqn_solver.remember(state, action, reward, state_next, terminal)
-            state = state_next
-            if terminal:
-                print ("Run: " + str(run) + ", exploration: " + str(dqn_solver.exploration_rate) + ", score: " + str(step))
-                score_logger.add_score(step, run)
-                break
-            dqn_solver.experience_replay()
+        score_times = []
+        #Train the agent in the first episode and evaluate in NTIMES-1
+        for i in range(NTIMES):
+            step = 0
+            state = env.reset()
+            state = np.reshape(state, [1, observation_space])
+            done = False
+            #Train the model
+            if i == 0:
+                while (not done):
+                    step += 1
+                    action = dqn_solver.act(state)
+                    agents_weights.append(dqn_solver.model_q.get_weights())
+                    state_next, reward, done, info = env.step(action)
+                    reward = reward if not done else -reward
+                    state_next = np.reshape(state_next, [1, observation_space])
+                    dqn_solver.remember(state, action, reward, state_next, done)
+                    state = state_next
+                    dqn_solver.experience_replay()
+            else:
+                #Evaluate
+                while (not done):
+                    step += 1
+                    if RENDER: 
+                        env.render()
+                    action = dqn_solver.act_eval(state)
+                    state_next, reward, done, info = env.step(action)
+                    reward = reward if not done else -reward
+                    state_next = np.reshape(state_next, [1, observation_space])
+                    state = state_next
 
+                    if done:
+                        score_times.append(step)
+
+
+        print ("Run: " + str(run) " score: " + str(np.mean(score_times)))
+        # If the trained agent reached the target check its stability over 100 episodes and exit
+        if np.mean(score_times) > TARGET:
+            evaluation = []
+            for i in range(100):
+                step = 0
+                state = env.reset()
+                state = np.reshape(state, [1, observation_space])
+                done = False
+                while (not done):
+                    step += 1
+                    action = dqn_solver.act_eval(state)
+                    state_next, reward, done, info = env.step(action)
+                    state_next = np.reshape(state_next, [1, observation_space])
+                    state = state_next
+
+                    if done:
+                        evaluation.append(step)
+            if np.mean(evaluation) > TARGET:
+                np.save('weights', np.array(agents_weights))
+                np.save('scores', np.array(score))
+                condition = False
 
 if __name__ == "__main__":
     cartpole()
