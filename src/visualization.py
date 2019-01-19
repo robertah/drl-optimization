@@ -29,11 +29,10 @@ def plot_weights_mean(weights, title="Weights Mean over Generations", xlabel="Ge
     means = []
     for w in weights:
         means.append(np.mean(w))
-    plt.figure(figsize=figsize)
     plt.plot(means)
-    plt.title(title, fontsize=fontsize)
-    plt.xlabel(xlabel, fontsize=fontsize)
-    plt.ylabel(ylabel, fontsize=fontsize)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
 
 
 def plot_weights_2d(weights, scores, title='Weights Evolution', save=False):
@@ -57,7 +56,7 @@ def plot_weights_2d(weights, scores, title='Weights Evolution', save=False):
     weights_2d = pca.fit_transform(weights.reshape(n_generations * n_agents, -1))
     weights_2d = weights_2d.reshape(n_generations, n_agents, 2)
 
-    fig, ax = plt.subplots(figsize=figsize)
+    fig, ax = plt.subplots()
     xmin, xmax = np.min(weights_2d[:, :, 0]), np.max(weights_2d[:, :, 0])
     ymin, ymax = np.min(weights_2d[:, :, 1]), np.max(weights_2d[:, :, 1])
     ax.set(xlim=(xmin, xmax), ylim=(ymin, ymax))
@@ -99,11 +98,10 @@ def plot_weights_difference(weights, title="Weights Diffs over Generations", xla
     for i, w in enumerate(weights):
         if i != 0:
             diffs.append(np.mean(w) - np.mean(weights[i - 1]))
-    plt.figure(figsize=figsize)
     plt.plot(diffs)
-    plt.title(title, fontsize=fontsize)
-    plt.xlabel(xlabel, fontsize=fontsize)
-    plt.ylabel(ylabel, fontsize=fontsize)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
 
 
 def plot_scores(scores, title="Scores over generations", xlabel="Generations", ylabel="Scores"):
@@ -123,11 +121,10 @@ def plot_scores(scores, title="Scores over generations", xlabel="Generations", y
     means = np.mean(scores, axis=1)
     stds = np.std(scores, axis=1)
     maxs = np.max(scores, axis=1)
-    plt.figure(figsize=figsize)
     plt.plot(means, label="mean")
     plt.fill_between(x_ticks, means - stds, means + stds, color="grey", alpha=0.2, label="standard deviation")
     plt.plot(maxs, label="max")
-    plt.title(title, fontsize=fontsize)
-    plt.xlabel(xlabel, fontsize=fontsize)
-    plt.ylabel(ylabel, fontsize=fontsize)
-    plt.legend(fontsize=10)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend()
