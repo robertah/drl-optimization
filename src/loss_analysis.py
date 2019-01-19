@@ -1,6 +1,7 @@
 # import scipy
 from scipy.spatial.distance import euclidean
-
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
 from population import Agent
 from visualization import *
 
