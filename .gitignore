@@ -117,3 +117,4 @@ results/saved_models/td3/*
 
 !CartPole-v1-20190103183514.npy
 !agent.gif
+!hessian.npy

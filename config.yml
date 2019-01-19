@@ -62,6 +62,10 @@ genetic_algorithm:
   noise_prob: 0.7
   path: 'ga'
 
+evolution_strategies:
+  noise: 0.1
+  path: 'es'
+
 cma_evolution_strategies:
   perc_selected: 0.25
   path: 'cma_es'

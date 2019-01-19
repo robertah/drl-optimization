@@ -71,10 +71,11 @@ class EvolutionaryOptimizers(ABC):
                     if save and (i + 1) % 50 == 0:
                         save_results(population.agents_weights[:i], population.scores[:i], timestamp)
 
-                    self.generate_next_generation(population=population, generation=i)
+                    if i < population.max_generations - 1:
+                        self.generate_next_generation(population=population, generation=i)
 
-                    for k, a in enumerate(agents):
-                        agents[k].model.set_weights(population.agents_weights[i + 1][k])
+                        for k, a in enumerate(agents):
+                            agents[k].model.set_weights(population.agents_weights[i + 1][k])
 
                 except KeyboardInterrupt:
                     LOGGER.log(environment=ENVIRONMENT.name,
