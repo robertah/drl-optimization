@@ -1,12 +1,12 @@
 from datetime import datetime
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import cm
 from matplotlib.animation import FuncAnimation
 from matplotlib.colors import Normalize
 from sklearn.decomposition import PCA
-import matplotlib
 
 from config import ENVIRONMENT, VISUALIZATION_WEIGHTS
 
@@ -65,7 +65,8 @@ def plot_weights_2d(weights, scores, title='Weights Evolution', save=False):
     colormap = cm.ScalarMappable(norm, 'magma_r')
     colors = colormap.to_rgba(scores)
 
-    scatter = ax.scatter(weights_2d[0, :, 0], weights_2d[0, :, 1], c=scores[0], cmap='magma_r', vmin=0, vmax=scores.max())
+    scatter = ax.scatter(weights_2d[0, :, 0], weights_2d[0, :, 1], c=scores[0], cmap='magma_r', vmin=0,
+                         vmax=scores.max())
     gen = ax.text(int(xmax - abs(xmax - xmin) / 2), int(ymax), "Generation: 0")
     cbar = plt.colorbar(scatter)
     cbar.set_label('Scores')
@@ -104,7 +105,7 @@ def plot_weights_difference(weights, title="Weights Diffs over Generations", xla
     plt.ylabel(ylabel)
 
 
-def plot_scores(scores, title="Scores over generations", xlabel="Generations", ylabel="Scores"):
+def plot_scores_generations(scores, title="Scores over generations", xlabel="Generations", ylabel="Scores"):
     """
     Plot the mean, std bands and max of scores obtained during training
 
@@ -128,3 +129,92 @@ def plot_scores(scores, title="Scores over generations", xlabel="Generations", y
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.legend()
+
+
+def plot_scores_episodes(scores, title="Scores over episodes", file="scores.pdf"):
+    """
+    Plot the mean, std bands and max of scores obtained during training
+
+    :param scores: scores (ndarray) obtained by each agent during each generation
+    :type scores: np.ndarray of shape (n_generation, n_agents)
+    :param title: plot's title
+    :type title: str
+    :param xlabel: plot's x label
+    :type xlabel: str
+    :param ylabel: plot's y label
+    :type ylabel: str
+    :param file: saving file
+    """
+
+    plt.title(title)
+    plt.plot([i * 20 for i in range(0, len(scores))], scores)
+    plt.legend()
+    plt.xlabel('Episodes')
+    plt.ylabel('Scores')
+    plt.savefig(file)
+
+
+def plot_distances(between_consecutive, from_initial, x_label="Generation", title='Distances', file='distance.pdf'):
+    """
+    Plot weights distances between consecutive episodes/generation and from the initail weights.
+
+    :param between_consecutive: array of computed distances between consecutive weights
+    :param from_initial: array of computed distances from initial weights
+    :param x_label: plot x label
+    :param title: plot's title
+    :param file: saving file
+    """
+
+    plt.title(title)
+    plt.plot(between_consecutive, 'r', label='Between consecutive')
+    plt.plot(from_initial, 'b', label='From initial')
+    plt.legend()
+    plt.grid(True)
+    plt.xlabel(x_label)
+    plt.ylabel('Euclidean distance')
+    plt.show()
+    plt.savefig(file)
+
+
+def plot_interpolation(alphas, inter_results, title='Linear interpolation initial and final agent',
+                        file='interpolation.pdf'):
+    """
+
+    :param alphas: computed alphas
+    :param inter_results: computed interpolation results
+    :param title: plot's title
+    :param file: saving file
+    :return:
+    """
+    plt.scatter(alphas, inter_results)
+    plt.xlabel('Alpha')
+    plt.ylabel('Mean score')
+    plt.grid(True)
+    plt.title(title)
+    plt.show()
+    plt.savefig(file)
+
+
+def plot_reward_along_eingenvector(alphas, t, scores, threshold,
+                                   title='Function along eigenvector relative to largest eigenvalue',
+                                   file='reward_engeinvector.pdf'):
+    """
+
+    :param alphas:
+    :param t:
+    :param scores:
+    :param threshold:
+    :param title:
+    :param file:
+    :return:
+    """
+
+    plt.plot(alphas, scores, 'r', label='Reward function along eigenvector')
+    plt.plot(alphas, np.ones(alphas.shape)*threshold, 'b', label='Epsilon threshold')
+    plt.vlines(alphas[t], 0, threshold, linestyles='dashed', label="Perturbation magnitude")
+    plt.ylabel('threshold: {}'.format(threshold))
+    plt.grid(True)
+    plt.legend()
+    plt.title(title)
+    plt.show()
+    plt.savefig(file)
