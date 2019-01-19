@@ -66,6 +66,11 @@ def interpolate(initial_agent, final_agent, objective, n_steps):
 
 
 def from_agent_to_weights(agent):
+    """
+    given and agent, we return a list of all its weights "flattened".
+    :param agent: the agent for which we want to extract the weights
+    :return: an numpy array containing the weights
+    """
     weights = agent.model.get_weights()
     flattened_weights = []
     for layer in weights:
@@ -76,6 +81,12 @@ def from_agent_to_weights(agent):
 
 
 def from_weights_to_layers(weights, agent):
+    """
+    given the weights and an agent, it reconstructs the layers composing the agent's network architecture
+    :param weights: the weights to use to build the layers
+    :param agent: the agent whose architecture is of interest
+    :return: the new layers, in a way that can be used by keras_model.set_weights(new_layers)
+    """
     agent_weights = agent.model.get_weights()
     initial_point = 0
     new_layers = []
@@ -245,6 +256,18 @@ def evaluate_in_neighborhood(f, weights, d1, d2, n_steps=20):
 
 
 def compute_epsilon_threshold(scores, epsilon=0.70, n_steps=80):
+    """
+    Given the scores in the neighborhood of the maximum reached by the training procedure, we want
+    to evaluate its robustness. Therefore we compute the minimal perturbation along the directions
+    of maximum curvature that make the agent perform arbitrarily bad (as indicated by epsilon).
+    :param scores: the scores in the neighborhood of the agent (must be of size n_steps*n_steps)
+    :param epsilon: the threshold of the score is computed as (max(scores)*epsilon).
+    :param n_steps: the number of perturbation steps along each direction
+    :return: the indexes of scores corresponding to the perturbation computed, the scores and threshold
+    """
+    assert scores.shape[0] == n_steps * n_steps
+    assert 0 < epsilon <= 1
+
     max_index = int(n_steps / 2)
     scores = np.reshape(scores, (n_steps, n_steps))
     maximum = scores[max_index, max_index]
@@ -312,6 +335,9 @@ def plot_reward_along_eigenvectors(final_agent, n_times=2, file="hessian", from_
 
 
 if __name__ == '__main__':
+    """
+    Example of main in which the whole pipeline is computed and the graphs plotted
+    """
     from GA import run_agent_es
     import matplotlib.pyplot as plt
     import os
@@ -323,7 +349,7 @@ if __name__ == '__main__':
     initial_agent = Agent(weights=children[0])
     final_agent = Agent(weights=children[-1])
     final_agent_copy = Agent(weights=children[-1])
-    v1, v2, all_scores, alphas = plot_reward_along_eigenvectors(final_agent, from_file=True)
+    v1, v2, all_scores, alphas = plot_reward_along_eigenvectors(final_agent, file="Hessian_larger")
     t1, t2, s1, s2, threshold = compute_epsilon_threshold(all_scores)
     #print(v1,v2)
 
