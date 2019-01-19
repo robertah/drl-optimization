@@ -21,17 +21,31 @@
 ### Requirements
 Create a virtual environment and install all required packages:
 
-`conda create --name deep-learning python=3.6`
+``` bash
 
-`source activate deep-learning`
+conda create --name deep-learning python=3.6
 
-`pip install -r requirements.txt`
+source activate deep-learning
+
+pip install -r requirements.txt
+``` 
+
 
 ### Configuration file
-In [`config.yml`](config.yml), one can choose which OpenAI Gym environment and optimization algorithm to use (all available possibilities are listed on top).
+In [`config.yml`](config.yml), one can choose which OpenAI Gym environment and optimization algorithm to use (all available possibilities are listed on top). For example:
+``` yaml
+
+environment:
+  name: 'CartPole-v1'
+  animate: False
+
+algorithm: 'ga' 
+
+``` 
+For each environment, we defined a specific neural network architecture for evolutionary algorithms in [`src/config/models.yml`](src/config/models.yml).
+
 It contains also optimization algorithms' parameters we used to train agents.
 
-For each environment, we defined a specific neural network architecture in [`src/config/models.yml`](src/config/models.yml).
 
 ### Train agents
 `python src/main.py`
