@@ -73,7 +73,7 @@ class DQNSolver:
         self.exploration_rate = max(EXPLORATION_MIN, self.exploration_rate)
 
 
-def cartpole():
+def train():
     env = gym.make(ENV_NAME)
     env._max_episode_steps = 500
     observation_space = env.observation_space.shape[0]
@@ -120,7 +120,7 @@ def cartpole():
                         score_times.append(step)
 
 
-        print ("Run: " + str(run) " score: " + str(np.mean(score_times)))
+        print ("Run: " + str(run) + " score: " + str(np.mean(score_times)))
         # If the trained agent reached the target check its stability over 100 episodes and exit
         if np.mean(score_times) > TARGET:
             evaluation = []
@@ -142,6 +142,3 @@ def cartpole():
                 np.save('weights', np.array(agents_weights))
                 np.save('scores', np.array(score))
                 condition = False
-
-if __name__ == "__main__":
-    cartpole()
