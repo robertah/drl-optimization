@@ -1,7 +1,5 @@
 # An Exploration of Optimization Alternatives for Deep Reinforcement Learning
 
-# WORKING IN PROGRESS
-
 ### Project for Deep Learning course - ETH Zurich - Fall 2018
 
 **Goal**: We analyze different optimization approaches and examine their performances in different DRL applications, aiming at understanding why and how they perform differently. In particular, we focus our analysis on gradient-based approaches and (gradient-free) evolution-based optimization methods.
@@ -9,7 +7,7 @@
 | **Environment**                 |   CartPole-v1        |   BipedalWalker-v2        |
 |---------------------------------|----------------------|---------------------------|
 | **Gradient-based optimization** |   DQN  &ast;         |   TD3 &ast;&ast;          |
-| **Gradient-free optimization**  |   GA, ES  &ast;      |   GA  &ast;&ast;&ast;     |
+| **Gradient-free optimization**  |   GA &ast;      |   GA  &ast;&ast;&ast;     |
 
 &ast; feed-forward neural network consisting of 1 hidden layer with 24 units
 
@@ -82,6 +80,8 @@ The analysis of the different DRL optimization algorithms can be found in `noteb
 │   ├── DDPG                  # Deep Deterministic Policy Gradients package
 │   ├── TD3                   # TD3 package
 │   ├── GA                    # Genetic Algorithm package
+│   ├── DQN                   # Deep Q Learning package
+│   ├── ES                    # Evolution Strategies package
 │   ├── CMA_ES                # Covariance Matrix Adapatation ES package
 │   ├── population            # population package for evolutionary algorithms
 │   ├── main.py               # main 
@@ -90,9 +90,7 @@ The analysis of the different DRL optimization algorithms can be found in `noteb
 │   ├── visualization.py      # visualization for analysis 
 │   └── utils.py              # helper functions
 ├── notebooks                 # notebooks with results analysis
-├── results                   # folder containing results after training
-│   ├── scores
-│   └── weights
+├── results                   # folder containing training results and analysis plots
 ├── runs.yml                  # runs log file
 └── requirements.txt          # list of all packages used
 
