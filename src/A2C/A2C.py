@@ -47,22 +47,14 @@ def run_agent_a2c():
                 score = score if score == 500.0 else score + 100
                 scores.append(score)
                 episodes.append(e)
-                print(agent.history)
-                plt.plot(agent.history)
-                plt.show()
-                #pylab.plot(episodes, scores, 'b')
-                #pylab.savefig("./save_graph/cartpole_a2c.png")
+                # print(agent.history)
+                # plt.plot(agent.history)
+                # plt.show()
                 print("episode:", e, "  score:", score)
 
-                # if the mean of scores of last 10 episode is bigger than 490
-                # stop training
                 if np.mean(scores[-min(10, len(scores)):]) > 200:
                     plt.plot(agent.history)
                     plt.show()
                     sys.exit()
 
-        # save the model
-        # if e % 50 == 0:
-        #     agent.actor.save_weights("./save_model/cartpole_actor.h5")
-    # agent.critic.save_weights("./save_model/cartpole_critic.h5")
     return scores

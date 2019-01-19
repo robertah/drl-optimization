@@ -12,25 +12,25 @@ environments:
       average_score: 195
       consecutive_trials: 100
 
-  - name: 'Acrobot-v1'
-    n_hidden_units:
-      - 24
-    activations:
-      - 'relu'
-    max_time: 2000
-    policy: 'argmax'
-    solved:
-      defined: False
-
-  - name: 'Pendulum-v0'
-    n_hidden_units:
-      - 24
-    activations:
-      - 'relu'
-    max_time: 2000
-    policy: 'normal'
-    solved:
-      defined: False
+#  - name: 'Acrobot-v1'
+#    n_hidden_units:
+#      - 24
+#    activations:
+#      - 'relu'
+#    max_time: 2000
+#    policy: 'argmax'
+#    solved:
+#      defined: False
+#
+#  - name: 'Pendulum-v0'
+#    n_hidden_units:
+#      - 24
+#    activations:
+#      - 'relu'
+#    max_time: 2000
+#    policy: 'normal'
+#    solved:
+#      defined: False
 
   - name: 'BipedalWalker-v2'
     n_hidden_units:
@@ -46,27 +46,27 @@ environments:
       average_score: 300
       consecutive_trials: 100
 
-  - name: 'Walker2d-v2'
-    n_hidden_units:  # https://arxiv.org/pdf/1710.06117.pdf
-      - 48
-      - 48
-    activations:
-      - 'relu'
-      - 'relu'
-    max_time: 2000
-    policy: 'normal'
-    solved:
-      defined: False
-
-
-  - name: 'Hopper-v2'
-    n_hidden_units:
-      - 128
-      - 128
-    activations:
-      - 'relu'
-      - 'relu'
-    max_time: 10000
-    policy: 'normal'
-    solved:
-      defined: False
+#  - name: 'Walker2d-v2'
+#    n_hidden_units:  # https://arxiv.org/pdf/1710.06117.pdf
+#      - 48
+#      - 48
+#    activations:
+#      - 'relu'
+#      - 'relu'
+#    max_time: 2000
+#    policy: 'normal'
+#    solved:
+#      defined: False
+#
+#
+#  - name: 'Hopper-v2'
+#    n_hidden_units:
+#      - 128
+#      - 128
+#    activations:
+#      - 'relu'
+#      - 'relu'
+#    max_time: 10000
+#    policy: 'normal'
+#    solved:
+#      defined: False

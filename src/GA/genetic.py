@@ -1,18 +1,18 @@
-from .genetic_functions import *
-from utils import save_results
-from population import Agent
-
 from config import ENVIRONMENT
+from population import Agent
+from utils import save_results
+from .genetic_functions import *
 
 
 def run_agent_es(n_agents=50, n_generations=100, save=True):
-    '''
+    """
     implmentation of the evolutionary strategy (ES) algorithm
+
     :param n_agents: number of agent per generation
     :param n_generations: number of generations
     :param save: save weights and scores at the end of training
     :return:
-    '''
+    """
     n_weights = len(Agent().model.get_weights())
 
     agents_weights = np.empty((n_generations, n_agents, n_weights), dtype=np.ndarray)
@@ -41,20 +41,23 @@ def run_agent_es(n_agents=50, n_generations=100, save=True):
 
 
 def run_agent_genetic_alternative(n_init_agents=300, n_agents=50, n_generations=100, save=True):
-    '''
-    In this version we have a different number of agents in the inizialization in order to better expore the parameter space at the beginning.
-    This is usefull just in the inizialization "to take the right direction in the parameter space" so it would be useless and computationally expensive use so much agents once the alg is initialized.
+    """
+    In this version we have a different number of agents in the inizialization in order to better expore the parameter
+    pace at the beginning.
+    This is useful just in the inizialization "to take the right direction in the parameter space" so it would be
+    useless and computationally expensive use so much agents once the alg is initialized.
+
     :param n_init_agents:
     :param n_agents:
     :param n_generations:
     :param save:
     :return:
-    '''
+    """
     n_weights = len(Agent().model.get_weights())
 
-    agents_weights = np.empty((n_generations-1, n_agents, n_weights), dtype=np.ndarray)
+    agents_weights = np.empty((n_generations - 1, n_agents, n_weights), dtype=np.ndarray)
     agents_init_weights = np.empty((n_init_agents, n_weights), dtype=np.ndarray)
-    scores = np.empty((n_generations-1, n_agents), dtype=float)
+    scores = np.empty((n_generations - 1, n_agents), dtype=float)
     init_scores = np.empty((n_init_agents), dtype=float)
 
     children = np.empty((n_generations, n_weights), dtype=np.ndarray)
@@ -72,10 +75,10 @@ def run_agent_genetic_alternative(n_init_agents=300, n_agents=50, n_generations=
             child = crossover_function(init_agents, init_scores)
 
         else:
-            agents_weights[i-1] = np.array([a.model.get_weights() for a in agents], dtype=np.ndarray)
+            agents_weights[i - 1] = np.array([a.model.get_weights() for a in agents], dtype=np.ndarray)
             for j, agent in enumerate(agents):  # TODO parallelize
-                scores[i-1][j] = agent.run_agent()
-            child = crossover_function(agents, scores[i-1])
+                scores[i - 1][j] = agent.run_agent()
+            child = crossover_function(agents, scores[i - 1])
 
         children[i] = np.array(child, dtype=np.ndarray).reshape(n_weights)
         agents = generate_population(child, n_agents, agents)
@@ -86,14 +89,12 @@ def run_agent_genetic_alternative(n_init_agents=300, n_agents=50, n_generations=
     return agents_weights, scores, children
 
 
-
-
-
-def run_agent_genetic_positive( n_agents=50, n_generations=100, save=True):
-    '''
-    This function uses crossover_function_1_1 where a linear interpolation between 0 and 1 is performed to have all scores (positive and negative)
-    scaled and positive between 0 and 1. To give more importance to better scores, the 3 power of the scores is taken before normalization.
-    '''
+def run_agent_genetic_positive(n_agents=50, n_generations=100, save=True):
+    """
+    This function uses crossover_function_1_1 where a linear interpolation between 0 and 1 is performed to have all
+    scores (positive and negative) scaled and positive between 0 and 1. To give more importance to better scores, the
+    3 power of the scores is taken before normalization.
+    """
     # initialize environment
     env = ENVIRONMENT.env
 

@@ -1,31 +1,20 @@
 import numpy as np
 
-
-# class OrnsteinUhlenbeckNoise:
-#
-#     def __init__(self, action_size, mu=0, theta=0.15, sigma=0.2):
-#         self.action_size = action_size
-#         self.mu = mu
-#         self.theta = theta
-#         self.sigma = sigma
-#         self.state = np.ones(self.action_size) * self.mu
-#         self.reset()
-#
-#     def reset(self):
-#         self.state = np.ones(self.action_size) * self.mu
-#
-#     def noise(self):
-#         x = self.state
-#         dx = self.theta * (self.mu - x) + self.sigma * np.random.randn(len(x))
-#         self.state = x + dx
-#         return self.state
-#
-#     def get_noisy_action(self, action):
-#         return action + self.noise()
-
-
 class OrnsteinUhlenbeckNoise:
+    """
+    Ornstein Uhlenbeck process for noise generation
+    """
     def __init__(self, action_space, mu=0.0, theta=0.15, max_sigma=0.3, min_sigma=0.3, decay_period=100000):
+        """
+        Initialize Ornstein Uhlenbeck process
+
+        :param action_space: gym environment's action space
+        :param mu:
+        :param theta:
+        :param max_sigma:
+        :param min_sigma:
+        :param decay_period:
+        """
         self.mu = mu
         self.theta = theta
         self.sigma = max_sigma
@@ -38,15 +27,29 @@ class OrnsteinUhlenbeckNoise:
         self.reset()
 
     def reset(self):
+        """
+        Reset state
+        """
         self.state = np.ones(self.action_dim) * self.mu
 
     def noise(self):
+        """
+        Generate noise
+        :return:
+        """
         x = self.state
         dx = self.theta * (self.mu - x) + self.sigma * np.random.randn(self.action_dim)
         self.state = x + dx
         return self.state
 
     def get_noisy_action(self, action, t=0):
+        """
+        Generate noisy action
+
+        :param action:
+        :param t:
+        :return:
+        """
         ou_state = self.noise()
         self.sigma = self.max_sigma - (self.max_sigma - self.min_sigma) * min(1.0, t / self.decay_period)
         return np.clip(action + ou_state, self.low, self.high)

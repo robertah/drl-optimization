@@ -7,13 +7,15 @@ from config import POPULATION
 
 
 class Population:
+    """
+    Population of agents, containing all evolved agents in multiple generations
+    """
 
     def __init__(self, optimizer):
         """
+        Initialize Population class
 
-        :param size:
-        :param max_generations:
-        :param optimizer:
+        :param optimizer: evolutionary based optimizer class
         """
 
         self.size = POPULATION.size
@@ -25,7 +27,7 @@ class Population:
 
     def create_population(self):
         """
-        Initialize population
+        Create first generation of population
 
         :return:
         """

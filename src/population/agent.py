@@ -1,26 +1,26 @@
 import numpy as np
 from keras.layers import Dense
 from keras.models import Sequential
-from keras.initializers import RandomNormal, RandomUniform
 from config import ENVIRONMENT, POPULATION
 
 
 class Agent:
 
     def __init__(self, weights=None):
+        """
+        Initialize agent
+
+        :param weights:
+        """
         self.env = ENVIRONMENT
         self.model = self.build_model()
         if weights is not None:
             self.model.set_weights(weights)
 
     def build_model(self):
-        '''
-        For the bipedal walker I had to use tanh because the output has to be a 4-dim vector with entries between [-1,1]
-        (not sure if it is the best setting, the important thing is that the entries have to be positive and negative,
-        the gym code already put action >1 or < -1 equal to 1 and -1 )
-        :param environment:
-        :return: model
-        '''
+        """
+        Build agent network model
+        """
         model = Sequential()
         model.add(Dense(
             units=self.env.hidden_units[0],
@@ -43,6 +43,12 @@ class Agent:
         return model
 
     def get_action(self, state):
+        """
+        Predict action
+
+        :param state: state
+        :return: predicted action
+        """
         policy = self.model.predict(state, batch_size=1).flatten()
         if self.env.policy == 'normal':
             return policy
@@ -51,6 +57,13 @@ class Agent:
         # return policy
 
     def run_agent(self, render=None):
+        """
+        Run agent
+
+        :param render: visualize agent
+        :type render: bool
+        :return:
+        """
         if render is None:
             render = self.env.animate
         scores = []

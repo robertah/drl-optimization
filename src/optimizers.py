@@ -9,6 +9,9 @@ from utils import print_scores, save_results
 
 
 class EvolutionaryOptimizers(ABC):
+    """
+    Base Optimizer class, for evolutionary algorithm
+    """
 
     @abstractmethod
     def generate_next_generation(self, population, generation):
@@ -38,18 +41,9 @@ class EvolutionaryOptimizers(ABC):
                 return True
         return False
 
-    # def terminate(self, agents):
-    #     for a in agents:
-    #         scores = []
-    #         for _ in range(100):
-    #             scores.append(a.run_agent())
-    #         if np.mean(scores) > 195:
-    #             return True
-    #     return False
-
     def evolve(self, population, save=True):
         """
-        Evolve agents through genetic algorithm
+        Evolve agents
 
         :param population:
         :type population:

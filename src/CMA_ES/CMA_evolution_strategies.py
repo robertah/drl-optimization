@@ -4,6 +4,9 @@ from config import CMAEvolutionStrategiesConfig
 
 
 class CMAEvolutionStrategies(EvolutionaryOptimizers):
+    """
+    Simplified Covariance Matrix Adaptation Evolutionary Strategies
+    """
 
     def __init__(self):
         self.perc_selected = CMAEvolutionStrategiesConfig.perc_selected
@@ -13,11 +16,10 @@ class CMAEvolutionStrategies(EvolutionaryOptimizers):
         """
         Select the best performing agents in the previous generation as new parents
 
-        :param scores:
-        :type scores:
-        :param population_size:
-        :type population_size:
-        :return:
+        :param scores: agents' score
+        :param population_size: population size (n agents per generation)
+
+        :return: indices of the best performing agents
         """
         n_selected = int(self.perc_selected * population_size)
         selected_parents = np.argsort(-scores)[:n_selected]
@@ -25,11 +27,24 @@ class CMAEvolutionStrategies(EvolutionaryOptimizers):
 
     @staticmethod
     def compute_covariance(parents):
+        """
+        Compute covariance of weights
+
+        :param parents: selected parents for breeding
+        :return: parents' covariance
+        """
         parents -= np.mean(parents, axis=0)
         covariance = np.dot(parents.T, parents.conj()) / (len(parents) - 1)
         return covariance
 
     def sample_children(self, population, parents):
+        """
+        Sample children from Gaussian distribution with parents' mean and covariance
+
+        :param population: population of agents
+        :param parents: selected parents
+        :return: sampled children
+        """
         weights_size = len(population.agents_weights[0][0])
         sampled = np.empty(weights_size, dtype=np.ndarray)
         for j in range(weights_size):
@@ -53,6 +68,12 @@ class CMAEvolutionStrategies(EvolutionaryOptimizers):
         return sampled
 
     def generate_next_generation(self, population, generation):
+        """
+        Update population's next generation
+
+        :param population: population of agents
+        :param generation: current generation id
+        """
         # get ids of the best performing agents
         id = self.selection(scores=population.scores[generation], population_size=population.size)
         sampled = self.sample_children(population, population.agents_weights[generation][id])

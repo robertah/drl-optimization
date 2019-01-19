@@ -1,12 +1,12 @@
-import numpy as np
-import sys
 from math import exp
 
+import numpy as np
 
 from config import RANDOM_SEED
 
 if RANDOM_SEED:
     np.random.seed(RANDOM_SEED)
+
 
 def noise(rewards):
     '''
@@ -16,8 +16,8 @@ def noise(rewards):
     :param rewards:
     :return: noise
     '''
-    noise = 20 /(1+exp(0.07*(rewards.max()))) + 0.1
-    print('max_rew:', rewards.max(), 'avarage_rew:', np.average(rewards) ,'  noise:',  noise)
+    noise = 20 / (1 + exp(0.07 * (rewards.max()))) + 0.1
+    print('max_rew:', rewards.max(), 'avarage_rew:', np.average(rewards), '  noise:', noise)
     return noise
 
 
@@ -65,9 +65,9 @@ def crossover_function_1(agents, reward):
     rewards = np.array(rewards)
     if len(agents_copy) == 0:
         noise = 0.5
-        #pick the meno peggio, return this as child model and increase the noise in the next gen
+        # pick the meno peggio, return this as child model and increase the noise in the next gen
         return agents[np.argmax(reward)].model.get_weights()
-        #sys.exit('Init Fail')
+        # sys.exit('Init Fail')
 
     num_layers = len(agents[0].model.get_weights())
     normalized_rewards = rewards / np.sum(rewards)
@@ -80,6 +80,7 @@ def crossover_function_1(agents, reward):
         child_model.append(new_layer)
     return child_model
 
+
 def crossover_function_1_1(agents, rewards):
     '''
     agents: a list of keras neural networks (parents agents)
@@ -89,9 +90,9 @@ def crossover_function_1_1(agents, rewards):
           of the parents w.r.t. the reward
     '''
     rewards = np.array(rewards)
-    scaled_rewards = np.power(np.interp(rewards, (rewards.min(), rewards.max()), (0, 1)),3)
-    #scaled_rewards = np.exp(rewards)
-    normalized_rewards = scaled_rewards/np.sum(scaled_rewards)
+    scaled_rewards = np.power(np.interp(rewards, (rewards.min(), rewards.max()), (0, 1)), 3)
+    # scaled_rewards = np.exp(rewards)
+    normalized_rewards = scaled_rewards / np.sum(scaled_rewards)
     num_layers = len(agents[0].model.get_weights())
     child_model = []
     for i in range(num_layers):
@@ -102,12 +103,13 @@ def crossover_function_1_1(agents, rewards):
         child_model.append(new_layer)
     return child_model
 
+
 def crossover_function_1_2(agents, rewards):
     rewards = np.array(rewards)
     scaled_rewards = np.interp(rewards, (rewards.min(), rewards.max()), (0, 1))
     ordered_indexes = np.argsort(-scaled_rewards)
-    best_agents = [agents[i] for i in ordered_indexes[:5] ]
-    best_scaled_norm_rew = scaled_rewards[ordered_indexes[:5]]/np.sum(scaled_rewards[ordered_indexes[:5]])
+    best_agents = [agents[i] for i in ordered_indexes[:5]]
+    best_scaled_norm_rew = scaled_rewards[ordered_indexes[:5]] / np.sum(scaled_rewards[ordered_indexes[:5]])
     num_layers = len(agents[0].model.get_weights())
     child_model = []
     for i in range(num_layers):
@@ -116,7 +118,8 @@ def crossover_function_1_2(agents, rewards):
             layer = parent_agent.model.get_weights()[i] * best_scaled_norm_rew[j]
             new_layer = new_layer + layer
         child_model.append(new_layer)
-    return  child_model
+    return child_model
+
 
 def generate_population(child_model, num_children, agents, noise):
     """
@@ -127,9 +130,9 @@ def generate_population(child_model, num_children, agents, noise):
     for child in range(num_children):
         new_child = []
         for layer in child_model:
-            #new_layer = np.random.normal(layer, GA_MUTATION_NOISE)
+            # new_layer = np.random.normal(layer, GA_MUTATION_NOISE)
             new_layer = np.random.normal(layer, noise)
             new_child.append(new_layer)
-        # Ho fatto questa piccola modifica per avere direttamente una lista di agenti che è quello che poi ci servirebbe piuttosto che una lista di modelli ma non sono sicuro che funzioni
+
         agents[child].model.set_weights(new_child)
     return agents

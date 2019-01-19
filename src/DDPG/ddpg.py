@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import numpy as np
 import tensorflow as tf
 from keras import backend as K
 
@@ -11,8 +10,17 @@ from .replay_buffer import ReplayBuffer
 
 
 class DDPG:
+    """
+    Deep Deterministic Policy Gradients - https://arxiv.org/pdf/1509.02971.pdf
+    """
 
     def __init__(self, environment, ddpg_config):
+        """
+        Initialize DDPG class
+
+        :param environment: gym environment
+        :param ddpg_config: DDPG config object
+        """
         self.environment = environment
 
         self.n_episodes = ddpg_config.n_episodes
@@ -24,7 +32,6 @@ class DDPG:
         self.critic_lr = ddpg_config.critic_lr
 
         config = tf.ConfigProto()
-        # config.gpu_options.allow_growth = True
         sess = tf.Session(config=config)
 
         K.set_session(sess)
@@ -45,6 +52,11 @@ class DDPG:
         self.target_critic_weights = ddpg_config.target_critic_weights
 
     def get_params(self):
+        """
+        Get DDPG parameters for logging
+
+        :return: dict of used parameters
+        """
         params = {
             'n_episodes': self.n_episodes,
             'batch_size': self.batch_size,
@@ -56,6 +68,13 @@ class DDPG:
         return params
 
     def run(self, train=True):
+        """
+        Run DDPG agent
+
+        :param train: train indicator
+        :type train: bool
+        :return:
+        """
 
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
 
@@ -64,12 +83,6 @@ class DDPG:
         self.load_weights()
 
         try:
-
-            for b in range(50000):
-                state = self.environment.env.reset()
-                action = self.actor.model.predict(state.reshape(1, state.shape[0]))
-                new_state, reward, done, info = self.environment.env.step(action[0])
-                self.buffer.add(state, action[0], reward, new_state, done)
 
             for i in range(self.n_episodes):
 
@@ -138,14 +151,15 @@ class DDPG:
                       " Replay Buffer size: {}".format(i, total_reward, step, self.buffer.n_experiences))
 
         except KeyboardInterrupt:
-            if i >= 100:
-                print("Saving weights...")
-                self.save_weights()
+            print("Training interrupted.")
 
         print("Saving weights...")
         self.save_weights()
 
     def load_weights(self):
+        """
+        Load trained models' weights
+        """
         try:
             self.actor.model.load_weights(self.actor_weights)
             self.critic.model.load_weights(self.critic_weights)
@@ -156,6 +170,9 @@ class DDPG:
             print("Pre-trained weights not found.")
 
     def save_weights(self):
+        """
+        Save models' weights
+        """
         self.actor.model.save_weights(self.actor_weights)
         self.critic.model.save_weights(self.critic_weights)
         self.actor.target_model.save(self.target_actor_weights)
