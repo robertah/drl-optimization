@@ -67,7 +67,7 @@ xvfb-run -s "-screen 0 1400x900x24" python src/main.py
 
 
 ### Results analysis
-The analysis of the different DRL optimization algorithms can be found in `notebooks/FILE`. 
+The analysis of the different DRL optimization algorithms can be found in `results` and `notebooks` folders. 
 
 
 ## Project directory
