@@ -7,7 +7,7 @@
 | **Environment**                 |   CartPole-v1        |   BipedalWalker-v2        |
 |---------------------------------|----------------------|---------------------------|
 | **Gradient-based optimization** |   DQN  &ast;         |   TD3 &ast;&ast;          |
-| **Gradient-free optimization**  |   GA &ast;      |   GA  &ast;&ast;&ast;     |
+| **Gradient-free optimization**  |   GA &ast;           |   GA  &ast;&ast;&ast;     |
 
 &ast; feed-forward neural network consisting of 1 hidden layer with 24 units
 
@@ -18,6 +18,8 @@
 <p align="center">
   <img src="/results/bipedalwalker_td3/agent.gif" width="60%"/>
 </p>
+
+**Evaluation metrics**: we compare the different algorithms, according to their time of convergence, total agent's reward, weights distances and reward function's hessian.
 
 ***
 
